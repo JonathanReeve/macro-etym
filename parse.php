@@ -8,7 +8,7 @@ include('dblayer.php');
 
 echo "Connected to database."; 
 
-//make the database
+//make the table
 $result=dbquery("CREATE TABLE IF NOT EXISTS etym_dict ( 
 	word VARCHAR(30),
 	word_lang CHAR(3),
@@ -17,12 +17,15 @@ $result=dbquery("CREATE TABLE IF NOT EXISTS etym_dict (
 	)") 
 or die("Failed to create table."); 
 
+//make the table Unicode-compatable
+$result=dbquery("ALTER TABLE etym_dict COLLATE utf8_general_ci")
+	or die("Failed to create table."); 
+
 function parse($line) { 
 	$pattern = "/.*\trel:etymology\t.*\n/"; 
 	if (preg_match_all($pattern, $line, $matches)) {
-		echo "Match was found <br />";
 		$match = $matches[0][0]; //the matched string appears at 0:0 in the array for some reason
-		echo "matches: ".$match; 
+//		echo "matches: ".$match; 
 		$match_pieces = explode("\t", $match); 
 		$word_pieces = explode(": ",$match_pieces[0]); 
 		$parent_pieces = explode(": ",$match_pieces[2]); 
@@ -30,10 +33,10 @@ function parse($line) {
 		$word = $word_pieces[1]; 
 		$parent_lang = $parent_pieces[0];
 		$parent_word = $parent_pieces[1]; 
-		echo "<p>Word: $word</p>"; 
-		echo "<p>Word lang: $word_lang</p>"; 
-		echo "<p>Parent lang: $parent_lang</p>"; 
-		echo "<p>Parent Word: $parent_word</p>"; 
+//		echo "<p>Word: $word</p>"; 
+//		echo "<p>Word lang: $word_lang</p>"; 
+//		echo "<p>Parent lang: $parent_lang</p>"; 
+//		echo "<p>Parent Word: $parent_word</p>"; 
 
 		$query="INSERT INTO etym_dict(word, word_lang,parent_word, parent_lang) VALUES ('$word','$word_lang', '$parent_word', '$parent_lang')"; 
 		$result=dbquery($query)
@@ -46,9 +49,7 @@ $handle = fopen("etymwn.tsv", 'r');
 $i=0; 
 if ($handle) {
     while (($line = fgets($handle, 4096)) !== false ) {
-	echo "<p>";
-        echo parse($line);
-	echo "</p>";
+        parse($line);
    }
  if (!feof($handle)) {
       echo "Error: unexpected fgets() fail\n";
