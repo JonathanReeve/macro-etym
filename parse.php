@@ -4,6 +4,14 @@ error_reporting(E_ALL);
 
 echo "Starting. Connecting..."; 
 
+//setup php for working with Unicode data
+mb_internal_encoding('UTF-8');
+mb_http_output('UTF-8');
+mb_http_input('UTF-8');
+mb_language('uni');
+mb_regex_encoding('UTF-8');
+ob_start('mb_output_handler'); 
+
 include('dblayer.php'); 
 
 echo "Connected to database."; 
@@ -18,7 +26,7 @@ $result=dbquery("CREATE TABLE IF NOT EXISTS etym_dict (
 or die("Failed to create table."); 
 
 //make the table Unicode-compatable
-$result=dbquery("ALTER TABLE etym_dict COLLATE utf8_general_ci")
+$result=dbquery("ALTER TABLE etym_dict CHARACTER SET utf8 COLLATE utf8_general_ci")
 	or die("Failed to create table."); 
 
 function parse($line) { 
@@ -38,7 +46,7 @@ function parse($line) {
 //		echo "<p>Parent lang: $parent_lang</p>"; 
 //		echo "<p>Parent Word: $parent_word</p>"; 
 
-		$query="INSERT INTO etym_dict(word, word_lang,parent_word, parent_lang) VALUES ('$word','$word_lang', '$parent_word', '$parent_lang')"; 
+		$query="INSERT INTO etym_dict(word, word_lang,parent_word, parent_lang) VALUES (\"$word\",\"$word_lang\", \"$parent_word\", \"$parent_lang\")"; 
 		$result=dbquery($query)
 			or die ("There was a problem inserting stuff into the etymological dictionary database."); 
 	} 
@@ -46,7 +54,6 @@ function parse($line) {
 
 //open the etymological wordnet for parsing
 $handle = fopen("etymwn.tsv", 'r'); 
-$i=0; 
 if ($handle) {
     while (($line = fgets($handle, 4096)) !== false ) {
         parse($line);
@@ -59,4 +66,5 @@ if ($handle) {
 
 echo "Closing database connection."; 
 dbclose($dbc); 
+
 ?> 
