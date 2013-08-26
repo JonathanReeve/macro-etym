@@ -91,32 +91,43 @@ $parent_langs=array();
 foreach (array_keys($results) as $word) { 
 	$parent_lang=lookup($word); 
 	echo "<p>Word: $word Parent lang: $parent_lang</p>"; 
-	$parent_langs[$word]=array($parent_lang,$results[$word]); 
+	$parent_langs[]=array($word,$parent_lang,$results[$word]); 
 } 
 
 print_r($parent_langs); 
-
 ?>
-
 <table> 
 	<th>Word</th>
-	<th>Frequency</th>
 	<th>Parent Language</th>
+	<th>Frequency</th>
+<?php
+echo "<p>Results:</p>"; 
 
-<?php 
+$lang_count=array(); 
+
 foreach($parent_langs as $wordResult) { 
-	print_r($wordResult); 
-//	$word=$wordResult
-//	$pl=$wordResult[1][0]; 
-//	$freq=$wordResult[1][1]; 
-//	echo "Word: $
-//	echo "<tr>
-//		<td>$word</td>
-//		<td>$pl</td>
-//		<td>$freq</td>
-//		</tr>"; 
+	$word=$wordResult[0];
+	$pl=$wordResult[1]; 
+	$freq=$wordResult[2]; 
+	echo "<tr>
+		<td>$word</td>
+		<td>$pl</td>
+		<td>$freq</td>
+		</tr>"; 
+ 	if (strlen($pl)>1 && !$lang_count[$pl]) { //check to see if the parent language is already in the tally
+		$lang_count[$pl]=1; 
+	} else { //if it is, increment the count
+		$lang_count[$pl]=$lang_count[$pl]+($lang_count[$pl]*$freq); 
+	} 	
 } 
-		?> 
+?> 
 </table>
 
+<?php
+
+echo "Lang count: "; 
+print_r($lang_count); 
+
+
+?> 
  
