@@ -67,7 +67,7 @@ Blin,byn
 Bliss,zbl
 Blissymbolics,zbl
 Blissymbols,zbl
-"Bokmål, Norwegian",nob
+Norwegian Bokmål,nob
 Bosnian,bos
 Braj,bra
 Breton,bre
@@ -111,9 +111,9 @@ Corsican,cos
 Cree,cre
 Creek,mus
 Creoles and pidgins,crp
-"Creoles and pidgins, English based",cpe
-"Creoles and pidgins, French-based",cpf
-"Creoles and pidgins, Portuguese-based",cpp
+English-based Creoles and pidgins,cpe
+French-based Creoles and pidgins,cpf
+Portuguese-based Creoles and pidgins,cpp
 Crimean Tatar,crh
 Crimean Turkish,crh
 Croatian,hrv
@@ -134,18 +134,18 @@ Dogrib,dgr
 Dravidian languages,dra
 Duala,dua
 Dutch,dut/nld
-"Dutch, Middle (ca.1050-1350)",dum
+Middle Dutch,dum
 Dyula,dyu
 Dzongkha,dzo
 Eastern Frisian,frs
 Edo,bin
 Efik,efi
-Egyptian (Ancient),egy
+Ancient Egyptian,egy
 Ekajuk,eka
 Elamite,elx
 English,eng
-"English, Middle (1100-1500)",enm
-"English, Old (ca.450-1100)",ang
+Middle English,enm
+Old English,ang
 Erzya,myv
 Esperanto,epo
 Estonian,est
@@ -161,8 +161,8 @@ Finno-Ugrian languages,fiu
 Flemish,dut/nld
 Fon,fon
 French,fre/fra
-"French, Middle (ca.1400-1600)",frm
-"French, Old (842-ca.1400)",fro
+Middle French,frm
+Old French,fro
 Friulian,fur
 Fulah,ful
 Ga,gaa
@@ -175,9 +175,9 @@ Gbaya,gba
 Geez,gez
 Georgian,geo/kat
 German,ger/deu
-"German, Low",nds
-"German, Middle High (ca.1050-1500)",gmh
-"German, Old High (ca.750-1050)",goh
+Low German,nds
+Middle High German,gmh
+Old High German,goh
 Germanic languages,gem
 Gikuyu,kik
 Gilbertese,gil
@@ -185,8 +185,9 @@ Gondi,gon
 Gorontalo,gor
 Gothic,got
 Grebo,grb
-"Greek, Ancient (to 1453)",grc
-"Greek, Modern (1453-)",gre/ell
+Ancient Greek,grc
+Modern Greek,gre
+Modern Greek,ell
 Greenlandic,kal
 Guarani,grn
 Gujarati,guj
@@ -212,20 +213,20 @@ Ido,ido
 Igbo,ibo
 Ijo languages,ijo
 Iloko,ilo
-Imperial Aramaic (700-300 BCE),arc
+Imperial Aramaic,arc
 Inari Sami,smn
 Indic languages,inc
 Indo-European languages,ine
 Indonesian,ind
 Ingush,inh
-Interlingua (International Auxiliary Language Association),ina
+Interlingua,ina
 Interlingue,ile
 Inuktitut,iku
 Inupiaq,ipk
 Iranian languages,ira
 Irish,gle
-"Irish, Middle (900-1200)",mga
-"Irish, Old (to 900)",sga
+Middle Irish,mga
+Old Irish,sga
 Iroquoian languages,iro
 Italian,ita
 Japanese,jpn
@@ -299,7 +300,7 @@ Luba-Lulua,lua
 Luiseno,lui
 Lule Sami,smj
 Lunda,lun
-Luo (Kenya and Tanzania),luo
+Luo,luo
 Lushai,lus
 Luxembourgish,ltz
 Macedo-Romanian,rup
@@ -349,8 +350,8 @@ Nahuatl languages,nah
 Nauru,nau
 Navaho,nav
 Navajo,nav
-"Ndebele, North",nde
-"Ndebele, South",nbl
+North Ndebele,nde
+South Ndebele,nbl
 Ndonga,ndo
 Neapolitan,nap
 Nepal Bhasa,new
@@ -362,7 +363,7 @@ Nilo-Saharan languages,ssa
 Niuean,niu
 No linguistic content,zxx
 Nogai,nog
-"Norse, Old",non
+Old Norse,non
 North American Indian languages,nai
 North Ndebele,nde
 Northern Frisian,frr
@@ -377,13 +378,13 @@ Nuosu,iii
 Nyamwezi,nym
 Nyanja,nya
 Nyankole,nyn
-"Nynorsk, Norwegian",nno
+Norwegian Nynorsk,nno
 Nyoro,nyo
 Nzima,nzi
 Occidental,ile
-Occitan (post 1500),oci
-"Occitan, Old (to 1500)",pro
-Official Aramaic (700-300 BCE),arc
+Occitan,oci
+Old Occitan,pro
+Official Aramaic,arc
 Oirat,xal
 Ojibwa,oji
 Old Bulgarian,chu
@@ -407,7 +408,7 @@ Papuan languages,paa
 Pashto,pus
 Pedi,nso
 Persian,per/fas
-"Persian, Old (ca.600-400 B.C.)",peo
+Old Persian,peo
 Philippine languages,phi
 Phoenician,phn
 Pilipino,fil
@@ -415,7 +416,7 @@ Pohnpeian,pon
 Polish,pol
 Portuguese,por
 Prakrit languages,pra
-"Provençal, Old (to 1500)",pro
+Old Provençal,pro
 Punjabi,pan
 Pushto,pus
 Quechua,que
@@ -440,7 +441,7 @@ Sanskrit,san
 Santali,sat
 Sardinian,srd
 Sasak,sas
-"Saxon, Low",nds
+Low Saxon,nds
 Scots,sco
 Scottish Gaelic,gla
 Selkup,sel
@@ -461,7 +462,7 @@ Sinhalese,sin
 Sino-Tibetan languages,sit
 Siouan languages,sio
 Skolt Sami,sms
-Slave (Athapascan),den
+Slave,den
 Slavic languages,sla
 Slovak,slo/slk
 Slovenian,slv
@@ -470,8 +471,8 @@ Somali,som
 Songhai languages,son
 Soninke,snk
 Sorbian languages,wen
-"Sotho, Northern",nso
-"Sotho, Southern",sot
+Northern Sotho,nso
+Southern Sotho,sot
 South American Indian languages,sai
 South Ndebele,nbl
 Southern Altai,alt
@@ -516,7 +517,7 @@ Tswana,tsn
 Tumbuka,tum
 Tupi languages,tup
 Turkish,tur
-"Turkish, Ottoman (1500-1928)",ota
+Ottoman Turkish,ota
 Turkmen,tuk
 Tuvalu,tvl
 Tuvinian,tyv
