@@ -4,9 +4,14 @@
 <style type="text/css"> 
 
 body { 
- background-color: darkblue;  
+ background-color: #181C52;   
 } 
 
+table { 
+ display: inline-block; 
+ vertical-align: top; 
+ margin: 0px 50px; 
+} 
 table, th, td { 
  border-collapse: collapse; 
  border: 1px solid darkblue; 
@@ -14,19 +19,25 @@ table, th, td {
 } 
 
 th { 
- background-color: green; 
- color: white; 
+ background-color: #181C52; 
+ color: #CDD3FF; 
 }  
 
 tr:nth-child(even) { 
- background-color: #0f0; 
+ background-color: #CDD3FF;  
+} 
+
+.box { 
+ margin: 50px; 
+ border: 1px dashed #181F52; 
+ padding: 10px; 
 } 
 
 #container { 
- background-color: white; 
+ background-color: #fff; 
  width: 70%;  
  margin: 0 auto; 
- padding: 20px; 
+ padding: 50px; 
 } 
 
 
@@ -145,6 +156,8 @@ foreach (array_keys($results) as $word) {
 } 
 ?> 
 
+<p>Total words: <?php echo $num_words ?> </p>
+
 <div class="box">
 <p>Couldn't find these words in the etymology dictionary: </p> 
 <?php foreach ($not_in_dict as $mystery_word) { 
@@ -153,7 +166,8 @@ foreach (array_keys($results) as $word) {
 </p>
 </div>
 
-<div class="box"> 
+
+<div class="table"> 
 <table> 
 	<th>Word</th>
 	<th>Parent Language</th>
@@ -182,17 +196,16 @@ foreach($parent_langs as $wordResult) {
 		$lang_count[$pl]=$lang_count[$pl]+$freq; 
 	} 	
 } 
-echo "</table>"; 
+?> 
 
-//now display results
+</table>
 
-echo "<p>Total words: $num_words </p>"; 
-
-echo "<table> 
+<table> 
 	<th>Language</th>
 	<th># Words</th>
-	<th>Percentage</th>"; 
+	<th>Percentage</th>
 
+<?php 
 foreach($lang_count as $lang => $count) { 
 	$percentage = round(($count/$num_words*100), 2); 
 	echo "<tr> 
@@ -201,9 +214,9 @@ foreach($lang_count as $lang => $count) {
 		<td>$percentage</td> 
 		</tr>"; 
 } 
-echo "</table>" 
-
 ?> 
+
+</table>
  
 </div> <!-- end of #container --> 
 </body>    
