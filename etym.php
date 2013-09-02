@@ -143,6 +143,7 @@ foreach (array_keys($results) as $word) {
 	$parent_langs[]=array($word,$parent_lang,$results[$word]); 
 	} else { 
 		$last_letter=substr($word, -1); 
+		$last_two_letters=substr($word, -2); 
 		if(strlen($word)>2 && $last_letter=="s") { //try version without -s at the end for those words that are bigger than two letters
 			$word = substr($word, 0, -1); 
 			$parent_lang=lookup($word); //using no -s version 
