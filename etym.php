@@ -1,7 +1,43 @@
+<!DOCTYPE html> 
+<html>
+<head> 
+<style type="text/css"> 
+
+body { 
+ background-color: darkblue;  
+} 
+
+table, th, td { 
+ border-collapse: collapse; 
+ border: 1px solid darkblue; 
+ padding: 3px; 
+} 
+
+th { 
+ background-color: green; 
+ color: white; 
+}  
+
+tr:nth-child(even) { 
+ background-color: #0f0; 
+} 
+
+#container { 
+ background-color: white; 
+ width: 70%;  
+ margin: 0 auto; 
+ padding: 20px; 
+} 
+
+
+</style> 
+</head>
+<body> 
+<div id="container"> 
+
 <?php
 
 error_reporting(E_ALL); 
-echo "Starting. Connecting..."; 
 
 //setup php for working with Unicode data
 mb_internal_encoding('UTF-8');
@@ -12,7 +48,6 @@ mb_regex_encoding('UTF-8');
 ob_start('mb_output_handler'); 
 
 include('dblayer.php'); 
-echo "Connected to database."; 
 
 // This part adapted from https://github.com/benbalter/Frequency-Analysis 
 
@@ -31,6 +66,7 @@ $content = preg_replace( "/\s\s+/", " ", $content );
 //split content on words
 $content = split(" ",$content);
 $words = Array();
+$num_words = count($content); 
 
 /**
  * Parses text and builds array of phrase statistics
@@ -71,9 +107,9 @@ function build_stats($input,$num) {
 }
 
 $results = build_stats($content, 1); 
-print_r($results); 
+//print_r($results); 
 
-echo "<p>Results: </p>";
+//echo "<p>Results: </p>";
 //print_r(array_keys($results)); 
 
 function lookup($word) { 
@@ -87,47 +123,88 @@ function lookup($word) {
 } 
 //initialize list of parent languages
 $parent_langs=array(); 
+$not_in_dict=array(); 
 
 foreach (array_keys($results) as $word) { 
 	$parent_lang=lookup($word); 
-	echo "<p>Word: $word Parent lang: $parent_lang</p>"; 
+	if (!empty($parent_lang)) {  
+	// echo "<p>Word: $word Parent lang: $parent_lang</p>"; 
 	$parent_langs[]=array($word,$parent_lang,$results[$word]); 
+	} else { 
+		$last_letter=substr($word, -1); 
+		if(strlen($word)>2 && $last_letter=="s") { //try version without -s at the end for those words that are bigger than two letters
+			$word = substr($word, 0, -1); 
+			$parent_lang=lookup($word); //using no -s version 
+		} 
+		if(!empty($parent_lang)) { 
+			$parent_langs[]=array($word,$parent_lang,$results[$word]); 
+		} else { 
+			$not_in_dict[]=$word; 
+		} 
+	} 
 } 
+?> 
 
-print_r($parent_langs); 
-?>
+<div class="box">
+<p>Couldn't find these words in the etymology dictionary: </p> 
+<?php foreach ($not_in_dict as $mystery_word) { 
+		echo "$mystery_word, "; 
+} ?> 
+</p>
+</div>
+
+<div class="box"> 
 <table> 
 	<th>Word</th>
 	<th>Parent Language</th>
 	<th>Frequency</th>
-<?php
-echo "<p>Results:</p>"; 
 
+<?php
 $lang_count=array(); 
+
 
 foreach($parent_langs as $wordResult) { 
 	$word=$wordResult[0];
 	$pl=$wordResult[1]; 
-	$freq=$wordResult[2]; 
+	$freq=intval($wordResult[2]); 
 	echo "<tr>
 		<td>$word</td>
 		<td>$pl</td>
 		<td>$freq</td>
 		</tr>"; 
  	if (strlen($pl)>1 && !$lang_count[$pl]) { //check to see if the parent language is already in the tally
-		$lang_count[$pl]=1; 
+		if ($freq>1) { 
+			$lang_count[$pl]=$freq; 
+		} else { 
+			$lang_count[$pl]=1; 
+		} 
 	} else { //if it is, increment the count
-		$lang_count[$pl]=$lang_count[$pl]+($lang_count[$pl]*$freq); 
+		$lang_count[$pl]=$lang_count[$pl]+$freq; 
 	} 	
 } 
-?> 
-</table>
+echo "</table>"; 
 
-<?php
+//now display results
 
-echo "Lang count: "; 
-print_r($lang_count); 
+echo "<p>Total words: $num_words </p>"; 
 
+echo "<table> 
+	<th>Language</th>
+	<th># Words</th>
+	<th>Percentage</th>"; 
+
+foreach($lang_count as $lang => $count) { 
+	$percentage = round(($count/$num_words*100), 2); 
+	echo "<tr> 
+		<td>$lang</td>
+		<td>$count</td>
+		<td>$percentage</td> 
+		</tr>"; 
+} 
+echo "</table>" 
 
 ?> 
  
+</div> <!-- end of #container --> 
+</body>    
+</html>    
