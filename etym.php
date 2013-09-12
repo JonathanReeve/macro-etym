@@ -60,6 +60,8 @@ ob_start('mb_output_handler');
 
 include('dblayer.php'); 
 
+echo 'Current php version: ' . phpversion(); 
+
 // This part adapted from https://github.com/benbalter/Frequency-Analysis 
 
 //grab file contents
@@ -129,7 +131,8 @@ function lookup($word) {
 	//echo "<p>Query is: $query</p>"; 
 	$result=dbquery($query) 
 	or die("Failed to look up words in database."); 
-	$parent_lang=mysqli_fetch_row($result)[0]; 
+	$parent_lang=mysqli_fetch_array($result); 
+	$parent_lang=$parent_lang[0]; 
 	return $parent_lang; 
 } 
 //initialize list of parent languages
