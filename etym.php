@@ -60,12 +60,20 @@ ob_start('mb_output_handler');
 
 include('dblayer.php'); 
 
-echo 'Current php version: ' . phpversion(); 
+// echo 'Current php version: ' . phpversion(); 
 
 // This part adapted from https://github.com/benbalter/Frequency-Analysis 
 
 //grab file contents
-$content = file_get_contents( 'test.txt' );
+if (isset($_GET["file"])) { 
+	$test_filename=$_GET["file"]; 
+} else { 
+	$test_filename = 'rimbaud.txt'; 
+	//$test_filename = 'heaney.txt'; 
+	//$test_filename = 'beowulf1.txt'; 
+} 
+echo "<p>Analyzing file: <a href='txt/$test_filename'>$test_filename</a></p>"; 
+$content = file_get_contents('txt/'.$test_filename);
 
 //if the file doesn't exist, error out
 if ( !$content )
