@@ -204,15 +204,28 @@ foreach($parent_langs as $wordResult) {
 </table>
 
 <table> 
+	<th>Code</th>
 	<th>Language</th>
 	<th># Words</th>
 	<th>Percentage</th>
 
 <?php 
+function look_up_lang($lang) { 
+	$query="SELECT language FROM lang_dict WHERE code=\"$lang\""; 
+	//echo "<p>Query is: $query</p>"; 
+	$result=dbquery($query) 
+	or die("Failed to look up language code in database."); 
+	$lang_full=mysqli_fetch_array($result); 
+	$lang_full=$lang_full[0]; 
+	return $lang_full; 
+
+} 
 foreach($lang_count as $lang => $count) { 
 	$percentage = round(($count/$num_words*100), 2); 
+	$lang_full = look_up_lang($lang); 
 	echo "<tr> 
 		<td>$lang</td>
+		<td>$lang_full</td> 
 		<td>$count</td>
 		<td>$percentage</td> 
 		</tr>"; 
