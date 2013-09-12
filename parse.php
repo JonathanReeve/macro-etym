@@ -37,10 +37,10 @@ function parse($line) {
 		$match_pieces = explode("\t", $match); 
 		$word_pieces = explode(": ",$match_pieces[0]); 
 		$parent_pieces = explode(": ",$match_pieces[2]); 
-		$word_lang = $word_pieces[0]; 
-		$word = $word_pieces[1]; 
-		$parent_lang = $parent_pieces[0];
-		$parent_word = $parent_pieces[1]; 
+		$word_lang = addslashes($word_pieces[0]); 
+		$word = addslashes($word_pieces[1]); 
+		$parent_lang = addslashes($parent_pieces[0]);
+		$parent_word = addslashes($parent_pieces[1]); 
 //		echo "<p>Word: $word</p>"; 
 //		echo "<p>Word lang: $word_lang</p>"; 
 //		echo "<p>Parent lang: $parent_lang</p>"; 
