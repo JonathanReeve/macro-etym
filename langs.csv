@@ -160,7 +160,8 @@ Finnish,fin
 Finno-Ugrian languages,fiu
 Flemish,dut/nld
 Fon,fon
-French,fre/fra
+French,fre
+French,fra
 Middle French,frm
 Old French,fro
 Friulian,fur
@@ -173,8 +174,10 @@ Ganda,lug
 Gayo,gay
 Gbaya,gba
 Geez,gez
-Georgian,geo/kat
-German,ger/deu
+Georgian,geo
+Georgian,kat
+German,ger
+German,deu
 Low German,nds
 Middle High German,gmh
 Old High German,goh
