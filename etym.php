@@ -48,7 +48,7 @@ tr:nth-child(even) {
 
 <?php
 
-error_reporting(E_ALL); 
+//error_reporting(E_ALL); 
 
 //setup php for working with Unicode data
 mb_internal_encoding('UTF-8');
@@ -171,7 +171,6 @@ foreach (array_keys($results) as $word) {
 </div>
 
 
-<div class="table"> 
 <table> 
 	<th>Word</th>
 	<th>Parent Language</th>
@@ -221,7 +220,31 @@ foreach($lang_count as $lang => $count) {
 ?> 
 
 </table>
- 
+
+
+<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    <script type="text/javascript">
+      google.load("visualization", "1", {packages:["corechart"]});
+      google.setOnLoadCallback(drawChart);
+      function drawChart() {
+        var data = google.visualization.arrayToDataTable([
+		['Language', 'Percentage'],
+<?php foreach($lang_count as $lang => $count) { 
+	$percentage = round(($count/$num_words*100), 2); 
+	echo "['$lang', $percentage],"; }  ?> 
+        ]);
+
+        var options = {
+          title: 'First Generation Word Parent Languages'
+        };
+
+        var chart = new google.visualization.PieChart(document.getElementById('piechart'));
+        chart.draw(data, options);
+      }
+    </script>
+  
+    <div id="piechart" style="width: 500px; height: 500px;"></div>
+
 </div> <!-- end of #container --> 
 </body>    
 </html>    
