@@ -8,13 +8,14 @@
 <body> 
 <div id="container"> 
 
+
 <?php 
 $test_texts_dir = 'txt'; 
 $test_texts = glob($test_texts_dir.'/*.txt'); 
 
 if($_SERVER['REQUEST_METHOD'] !== "POST"):  ?> 
 
-<p>This script will run a frequency analysis on the text, then look up each word in the word frequency list in the Etymological Wordnet.</p> 
+<p>This script will run a frequency analysis on the text, then look up each word in the word frequency list in the Etymological Wordnet. The program is super inefficient at the moment, and so expect to wait a good minute or so before the page loads. The test texts marked "toobig" are too big to load.</p> 
 
 <form action="" method="post"> 
 <select name="filename"> 
@@ -40,6 +41,7 @@ mb_regex_encoding('UTF-8');
 ob_start('mb_output_handler'); 
 
 include('dblayer.php'); 
+
 
 // echo 'Current php version: ' . phpversion(); 
 
@@ -147,6 +149,9 @@ foreach (array_keys($results) as $word) {
 
 <p>Total words: <?php echo $num_words ?> </p>
 
+<div id="piechart" style="width: 500px; height: 500px;"></div>
+
+
 <div class="box">
 <p>Couldn't find these words in the etymology dictionary: </p> 
 <?php foreach ($not_in_dict as $mystery_word) { 
@@ -195,6 +200,16 @@ foreach($parent_langs as $wordResult) {
 	<th>Percentage</th>
 
 <?php 
+
+$lang_tree['Germanic'] = array('eng','enm','ang','goh','deu','gmh','gml','nld','non','dan','odt'); 
+$lang_tree['Latinate'] =  array('fra','frm','fro','xno','ita','lat'); 
+$lang_tree['Slavic'] = array('ces'); 
+$lang_tree['Celtic'] = array('sga'); 
+$lang_tree['Afroasiatic'] = array('ara'); 
+$lang_tree['Iranian'] = array('fas'); 
+$lang_tree['Hellenic'] = array('grc'); 
+$lang_tree['Other'] = array('nan'); 
+
 function look_up_lang($lang) { 
 	$query="SELECT language FROM lang_dict WHERE code=\"$lang\""; 
 	//echo "<p>Query is: $query</p>"; 
@@ -205,7 +220,14 @@ function look_up_lang($lang) {
 	return $lang_full; 
 
 } 
-foreach($lang_count as $lang => $count) { 
+foreach($lang_count as $lang => $count) { //loop through the raw languages list 
+
+	foreach($lang_tree as $lang_family => $lang_children) { //count languages according to their language families 
+		if (in_array($lang, $lang_children)) { 
+			$families[$lang_family] = $families[$lang_family]+$count; 
+		} 
+	} 
+
 	$percentage = round(($count/$num_words*100), 2); 
 	$lang_full = look_up_lang($lang); 
 	echo "<tr> 
@@ -215,10 +237,20 @@ foreach($lang_count as $lang => $count) {
 		<td>$percentage</td> 
 		</tr>"; 
 } 
+
+$families['Unknown']=count($not_in_dict); 
 ?> 
 
 </table>
 
+<table> 
+<th>Family</th>
+<th># Words</th>
+<?php foreach ($families as $family => $count) { 
+	echo "<tr><td>$family</td><td>$count</td>"; 
+} ?> 
+
+</table> 
 
 <script type="text/javascript" src="https://www.google.com/jsapi"></script>
     <script type="text/javascript">
@@ -226,14 +258,14 @@ foreach($lang_count as $lang => $count) {
       google.setOnLoadCallback(drawChart);
       function drawChart() {
         var data = google.visualization.arrayToDataTable([
-		['Language', 'Percentage'],
-<?php foreach($lang_count as $lang => $count) { 
-	$percentage = round(($count/$num_words*100), 2); 
-	echo "['$lang', $percentage],"; }  ?> 
-        ]);
+		['Family', 'Count'],
+<?php foreach ($families as $family => $count) { 
+	echo "['$family', $count],"; 
+} ?> 
+	]); 
 
         var options = {
-          title: 'First Generation Word Parent Languages'
+          title: 'First Generation Parent Language Families'
         };
 
         var chart = new google.visualization.PieChart(document.getElementById('piechart'));
@@ -241,7 +273,6 @@ foreach($lang_count as $lang => $count) {
       }
     </script>
   
-    <div id="piechart" style="width: 500px; height: 500px;"></div>
 
 <?php endif; ?> 
 
