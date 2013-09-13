@@ -8,7 +8,26 @@
 <body> 
 <div id="container"> 
 
-<?php
+<?php 
+$test_texts_dir = 'txt'; 
+$test_texts = glob($test_texts_dir.'/*.txt'); 
+
+if($_SERVER['REQUEST_METHOD'] !== "POST"):  ?> 
+
+<p>This script will run a frequency analysis on the text, then look up each word in the word frequency list in the Etymological Wordnet.</p> 
+
+<form action="" method="post"> 
+<select name="filename"> 
+<?php foreach ($test_texts as $text) { 
+	echo "<option value='$text'>$text</option>"; 
+} ?> 
+</select> 
+<button type="submit">Analyze!</button> 
+</form>    
+
+<?php endif; ?> 
+
+<?php if($_SERVER['REQUEST_METHOD'] == "POST"):  
 
 //error_reporting(E_ALL); 
 
@@ -27,15 +46,11 @@ include('dblayer.php');
 // This part adapted from https://github.com/benbalter/Frequency-Analysis 
 
 //grab file contents
-if (isset($_GET["file"])) { 
-	$test_filename=$_GET["file"]; 
-} else { 
-	$test_filename = 'rimbaud.txt'; 
-	//$test_filename = 'heaney.txt'; 
-	//$test_filename = 'beowulf1.txt'; 
-} 
-echo "<p>Analyzing file: <a href='txt/$test_filename'>$test_filename</a></p>"; 
-$content = file_get_contents('txt/'.$test_filename);
+
+$test_filename=$_POST["filename"]; 
+
+echo "<p>Analyzing file: <a href='$test_filename'>$test_filename</a></p>"; 
+$content = file_get_contents($test_filename);
 
 //if the file doesn't exist, error out
 if ( !$content )
@@ -227,6 +242,8 @@ foreach($lang_count as $lang => $count) {
     </script>
   
     <div id="piechart" style="width: 500px; height: 500px;"></div>
+
+<?php endif; ?> 
 
 </div> <!-- end of #container --> 
 </body>    
