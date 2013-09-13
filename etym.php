@@ -1,47 +1,9 @@
 <!DOCTYPE html> 
-<html>
+<html lang="en">
 <head> 
-<style type="text/css"> 
 
-body { 
- background-color: #181C52;   
-} 
+<link rel="stylesheet" href="style.css"> 
 
-table { 
- display: inline-block; 
- vertical-align: top; 
- margin: 0px 50px; 
-} 
-table, th, td { 
- border-collapse: collapse; 
- border: 1px solid darkblue; 
- padding: 3px; 
-} 
-
-th { 
- background-color: #181C52; 
- color: #CDD3FF; 
-}  
-
-tr:nth-child(even) { 
- background-color: #CDD3FF;  
-} 
-
-.box { 
- margin: 50px; 
- border: 1px dashed #181F52; 
- padding: 10px; 
-} 
-
-#container { 
- background-color: #fff; 
- width: 70%;  
- margin: 0 auto; 
- padding: 50px; 
-} 
-
-
-</style> 
 </head>
 <body> 
 <div id="container"> 
