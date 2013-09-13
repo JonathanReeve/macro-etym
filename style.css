@@ -2,10 +2,13 @@ body {
 	background-color: #181C52;   
 } 
 
+table,#piechart { 
+	margin: 10px auto; 
+} 
+
 table { 
 	vertical-align: top; 
-	margin: 20px auto; 
-} 
+}
 
 table, th, td { 
 	border-collapse: collapse; 

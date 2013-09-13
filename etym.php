@@ -18,11 +18,13 @@ if($_SERVER['REQUEST_METHOD'] !== "POST"):  ?>
 <p>This script will run a frequency analysis on the text, then look up each word in the word frequency list in the Etymological Wordnet. The program is super inefficient at the moment, and so expect to wait a good minute or so before the page loads. The test texts marked "toobig" are too big to load.</p> 
 
 <form action="" method="post"> 
+Text file to analyze: 
 <select name="filename"> 
 <?php foreach ($test_texts as $text) { 
 	echo "<option value='$text'>$text</option>"; 
 } ?> 
 </select> 
+<p><input type="checkbox" name="remove_boring" />Remove frequently used words like "the" and "a."</p> 
 <button type="submit">Analyze!</button> 
 </form>    
 
@@ -96,8 +98,10 @@ function build_stats($input,$num) {
 	}
 	if ($num == 1) {
 		//clean boring words
-		//$a = split(" ","the of and to a in that it is was i for on you he be with as by at have are this not but had his they from she which or we an there her were one do been all their has would will what if can when so my");
-		//foreach ($a as $banned) unset($results[$banned]);
+		if (isset($_POST['remove_boring'])) {  
+			$a = split(" ","the of and to a in that it is was i for on you he be with as by at have are this not but had his they from she which or we an there her were one do been all their has would will what if can when so my");
+			foreach ($a as $banned) unset($results[$banned]);
+		} 
 	}
 	
 	//sort, clean, return
@@ -114,7 +118,7 @@ $results = build_stats($content, 1);
 
 function lookup($word) { 
 	//connect to database
-	$query="SELECT parent_lang FROM etym_dict WHERE word=\"$word\""; 
+	$query="SELECT parent_lang FROM etym_dict WHERE word=\"$word\" and word_lang=\"eng\""; //making this English-only for now
 	//echo "<p>Query is: $query</p>"; 
 	$result=dbquery($query) 
 	or die("Failed to look up words in database."); 
@@ -266,6 +270,7 @@ $families['Unknown']=count($not_in_dict);
 
         var options = {
           title: 'First Generation Parent Language Families'
+          is3D: true,
         };
 
         var chart = new google.visualization.PieChart(document.getElementById('piechart'));
