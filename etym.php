@@ -153,7 +153,7 @@ foreach (array_keys($results) as $word) {
 
 <p>Total words: <?php echo $num_words ?> </p>
 
-<div id="piechart" style="width: 500px; height: 500px;"></div>
+<div id="piechart" style="width: 500px; height: 400px;"></div>
 
 
 <div class="box">
@@ -269,7 +269,7 @@ $families['Unknown']=count($not_in_dict);
 	]); 
 
         var options = {
-          title: 'First Generation Parent Language Families'
+          title: 'First Generation Parent Language Families',
           is3D: true,
         };
 
