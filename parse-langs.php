@@ -18,7 +18,7 @@ echo "Connected to database.";
 
 //make the table
 $result=dbquery("CREATE TABLE IF NOT EXISTS lang_dict ( 
-	language VARCHAR(30),
+	language VARCHAR(50),
 	code CHAR(3)
 	)") or die("Failed to create table."); 
 
@@ -27,16 +27,17 @@ $result=dbquery("ALTER TABLE lang_dict CHARACTER SET utf8 COLLATE utf8_general_c
 	or die("Failed to create table."); 
 
 function parse($line) { 
-		$data=str_getcsv($line); 
-		$lang=$data[0]; 
-		$code=$data[1]; 
+		$data = str_getcsv($line); 
+		print_r($data); 
+		$lang=$data[1]; 
+		$code=$data[0]; 
 		$query="INSERT INTO lang_dict(language, code) VALUES (\"$lang\",\"$code\")"; 
 		$result=dbquery($query)
 			or die ("There was a problem inserting language codes into the database."); 
 	} 
 
 //open the etymological wordnet for parsing
-$handle = fopen("langs.csv", 'r'); 
+$handle = fopen("iso-639-3-clean.csv", 'r'); 
 if ($handle) {
     while (($line = fgets($handle, 4096)) !== false ) {
         parse($line);
