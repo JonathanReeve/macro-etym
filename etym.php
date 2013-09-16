@@ -9,18 +9,17 @@
 <body> 
 <div id="container"> 
 
+<h1>Macro-Etymological Analyzer</h1> 
 
-<?php 
+<?php if($_SERVER['REQUEST_METHOD'] !== "POST"):  ?> 
 
-if($_SERVER['REQUEST_METHOD'] !== "POST"):  ?> 
-
-<p>This script will run a frequency analysis on the text, then look up each word in the word frequency list in the Etymological Wordnet. The program is super inefficient at the moment, and so expect to wait a good minute or so before the page loads. The test texts marked "toobig" are too big to load.</p> 
+<p>This program will run a frequency analysis on your text, then look up each word in the word frequency list using the Etymological Wordnet. The program is super inefficient at the moment, so please be patient as it looks up all the words. So far, this program can only handle texts of &lt; 1000 words.</p> 
 
 <form enctype="multipart/form-data" action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post"> 
-<label for="file">Upload a file:</label> 
-<input type="file" name="file" id="file"><br/> 
+<p><label for="file">Upload a file:</label> 
+<input type="file" name="file" id="file"></p> 
 
-Or select a test text file to analyze: 
+<p>Or select a test text file to analyze: 
 <select name="filename"> 
 <?php 
 $test_texts_dir = 'txt'; 
@@ -48,6 +47,12 @@ mb_regex_encoding('UTF-8');
 ob_start('mb_output_handler'); 
 
 include('dblayer.php'); 
+
+function debug_print($text) { 
+	echo $text; 
+	ob_flush(); 
+	flush(); 
+} 
 
 // echo 'Current php version: ' . phpversion(); 
 
@@ -78,7 +83,10 @@ if ($_FILES["file"]["name"]!=NULL) {
 } else { 
 	$test_filename=$_POST["filename"];
 	echo "<p>Using test file: <a href='$test_filename'>$test_filename</a></p>"; 
+	ob_flush();
+	flush(); 
 } 	
+
 
 $content = file_get_contents($test_filename);
 
@@ -86,15 +94,20 @@ $content = file_get_contents($test_filename);
 if ( !$content )
 	die( 'No file to analyze. Ergo, nothing to do.' );
 
+
 //strip out bad characters
-$content = preg_replace( "/(,|\"|\.|\?|:|!|;| - )/", " ", $content );
-$content = preg_replace( "/\n/", " ", $content );
-$content = preg_replace( "/\s\s+/", " ", $content );
+debug_print("<p>Cleaning files..."); 
+//$content = preg_replace( "/(,|\"|\.|\?|:|!|;| - )/", " ", $content );
+//$content = preg_replace( "/\n/", " ", $content );
+//$content = preg_replace( "/\s\s+/", " ", $content );
+
+$content = str_word_count($content,1); //trying a different method for cleaning
+
+debug_print("done.</p>"); 
 
 //split content on words
-$content = split(" ",$content);
+//$content = split(" ",$content);
 $words = Array();
-$num_words = count($content); 
 
 /**
  * Parses text and builds array of phrase statistics
@@ -136,11 +149,14 @@ function build_stats($input,$num) {
 	return $results;
 }
 
+debug_print("<p>Building statistics..."); 
 $results = build_stats($content, 1); 
-//print_r($results); 
+debug_print("done.</p>"); 
 
-//echo "<p>Results: </p>";
-//print_r(array_keys($results)); 
+$num_words = count($content); 
+$unique_words = count($results); 
+$basic_stats_message = "<p>This text contains $num_words words, of which $unique_words are unique.</p>"; 
+debug_print($basic_stats_message); 
 
 function lookup($word) { 
 	//connect to database
@@ -152,15 +168,17 @@ function lookup($word) {
 	$parent_lang=$parent_lang[0]; 
 	return $parent_lang; 
 } 
+
 //initialize list of parent languages
 $parent_langs=array(); 
 $not_in_dict=array(); 
 
+debug_print("<p>Looking up $unique_words words. This may take a while. Looking up: "); 
 foreach (array_keys($results) as $word) { 
 	$parent_lang=lookup($word); 
 	if (!empty($parent_lang)) {  
-	// echo "<p>Word: $word Parent lang: $parent_lang</p>"; 
-	$parent_langs[]=array($word,$parent_lang,$results[$word]); 
+		$parent_langs[]=array($word,$parent_lang,$results[$word]); 
+		debug_print("$word, "); 
 	} else { 
 		$last_letter=substr($word, -1); 
 		$last_two_letters=substr($word, -2); 
@@ -170,17 +188,17 @@ foreach (array_keys($results) as $word) {
 		} 
 		if(!empty($parent_lang)) { 
 			$parent_langs[]=array($word,$parent_lang,$results[$word]); 
+			debug_print("<span class="blue">$word</span>, "); 
 		} else { 
 			$not_in_dict[]=$word; 
+			debug_print("<span class="red">$word</span>, "); 
 		} 
 	} 
 } 
+debug_print(" done.</p>"); 
 ?> 
 
-<p>Total words: <?php echo $num_words ?> </p>
-
 <div id="piechart" style="width: 500px; height: 400px;"></div>
-
 
 <div class="box">
 <p>Couldn't find these words in the etymology dictionary: </p> 
@@ -305,6 +323,9 @@ $families['Unknown']=count($not_in_dict);
 
 <?php endif; ?> 
 
+<footer> 
+<p>Examine or fork the source code for this program at <a href="http://github.com/JonathanReeve/bulk-etym/">http://github.com/JonathanReeve/bulk-etym/</a>.</p>  
+</footer>    
 </div> <!-- end of #container --> 
 </body>    
 </html>    
