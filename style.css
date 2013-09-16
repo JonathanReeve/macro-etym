@@ -2,6 +2,14 @@ body {
 	background-color: #181C52;   
 } 
 
+.red { 
+	color: red; 
+} 
+
+.blue { 
+	color: blue; 
+} 
+
 table,#piechart { 
 	margin: 10px auto; 
 } 
