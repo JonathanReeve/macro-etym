@@ -2,6 +2,7 @@
 <html lang="en">
 <head> 
 
+<meta charset="utf-8">
 <link rel="stylesheet" href="style.css"> 
 
 </head>
@@ -10,17 +11,21 @@
 
 
 <?php 
-$test_texts_dir = 'txt'; 
-$test_texts = glob($test_texts_dir.'/*.txt'); 
 
 if($_SERVER['REQUEST_METHOD'] !== "POST"):  ?> 
 
 <p>This script will run a frequency analysis on the text, then look up each word in the word frequency list in the Etymological Wordnet. The program is super inefficient at the moment, and so expect to wait a good minute or so before the page loads. The test texts marked "toobig" are too big to load.</p> 
 
-<form action="" method="post"> 
-Text file to analyze: 
+<form enctype="multipart/form-data" action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post"> 
+<label for="file">Upload a file:</label> 
+<input type="file" name="file" id="file"><br/> 
+
+Or select a test text file to analyze: 
 <select name="filename"> 
-<?php foreach ($test_texts as $text) { 
+<?php 
+$test_texts_dir = 'txt'; 
+$test_texts = glob($test_texts_dir.'/*.txt'); 
+foreach ($test_texts as $text) { 
 	echo "<option value='$text'>$text</option>"; 
 } ?> 
 </select> 
@@ -44,21 +49,42 @@ ob_start('mb_output_handler');
 
 include('dblayer.php'); 
 
-
 // echo 'Current php version: ' . phpversion(); 
 
 // This part adapted from https://github.com/benbalter/Frequency-Analysis 
 
 //grab file contents
+if ($_FILES["file"]["name"]!=NULL) { 
+	echo "<p>Upload successful. Checking file.</p>"; 
+	$temp = explode(".", $_FILES["file"]["name"]);
+	if (($_FILES["file"]["type"] == "text/plain")
+		&& ($_FILES["file"]["size"] < 20000)) 
+	{
+		if ($_FILES["file"]["error"] > 0)
+		{
+			echo "<p>Error: " . $_FILES["file"]["error"] . "</p>";
+		}
+		else
+		{
+			echo "<p>Upload: " . $_FILES["file"]["name"] . "</p>";
+			echo "<p>Type: " . $_FILES["file"]["type"] . "</p>";
+			echo "<p>Size: " . ($_FILES["file"]["size"] / 1024) . " kB</p>";
+			echo "<p>Stored in: " . $_FILES["file"]["tmp_name"] . "</p>";
+		}
+	} else {
+		echo "<p>Invalid file. Please make sure your file is a plain text file and is small enough for this program to analyze.</p>";
+	}
+	$test_filename=$_FILES["file"]["tmp_name"]; 
+} else { 
+	$test_filename=$_POST["filename"];
+	echo "<p>Using test file: <a href='$test_filename'>$test_filename</a></p>"; 
+} 	
 
-$test_filename=$_POST["filename"]; 
-
-echo "<p>Analyzing file: <a href='$test_filename'>$test_filename</a></p>"; 
 $content = file_get_contents($test_filename);
 
 //if the file doesn't exist, error out
 if ( !$content )
-	die( 'Please place your source text in "input.txt" in the same directory as this file' );
+	die( 'No file to analyze. Ergo, nothing to do.' );
 
 //strip out bad characters
 $content = preg_replace( "/(,|\"|\.|\?|:|!|;| - )/", " ", $content );
@@ -75,7 +101,7 @@ $num_words = count($content);
  *
  * @param string $input source text
  * @param int $num number of words in phrase to look for
- * @rerturn array array of phrases and counts
+ * @return array array of phrases and counts
  */
 function build_stats($input,$num) {
 
@@ -222,16 +248,14 @@ function look_up_lang($lang) {
 	$lang_full=mysqli_fetch_array($result); 
 	$lang_full=$lang_full[0]; 
 	return $lang_full; 
-
 } 
-foreach($lang_count as $lang => $count) { //loop through the raw languages list 
 
+foreach($lang_count as $lang => $count) { //loop through the raw languages list 
 	foreach($lang_tree as $lang_family => $lang_children) { //count languages according to their language families 
 		if (in_array($lang, $lang_children)) { 
 			$families[$lang_family] = $families[$lang_family]+$count; 
 		} 
 	} 
-
 	$percentage = round(($count/$num_words*100), 2); 
 	$lang_full = look_up_lang($lang); 
 	echo "<tr> 
