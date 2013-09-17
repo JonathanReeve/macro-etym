@@ -3,6 +3,7 @@
 <head> 
 
 <meta charset="utf-8">
+<link href='http://fonts.googleapis.com/css?family=Rokkitt:400,700' rel='stylesheet' type='text/css'> 
 <link rel="stylesheet" href="style.css"> 
 
 </head>
@@ -173,7 +174,7 @@ function lookup($word) {
 $parent_langs=array(); 
 $not_in_dict=array(); 
 
-debug_print("<p>Looking up $unique_words words. This may take a while. Looking up: "); 
+debug_print("<p>Looking up $unique_words words. This may take a while.</p> <p>Looking up: "); 
 foreach (array_keys($results) as $word) { 
 	$parent_lang=lookup($word); 
 	if (!empty($parent_lang)) {  
@@ -188,10 +189,10 @@ foreach (array_keys($results) as $word) {
 		} 
 		if(!empty($parent_lang)) { 
 			$parent_langs[]=array($word,$parent_lang,$results[$word]); 
-			debug_print("<span class="blue">$word</span>, "); 
+			debug_print("<span class=\"blue\">$word</span>, "); 
 		} else { 
 			$not_in_dict[]=$word; 
-			debug_print("<span class="red">$word</span>, "); 
+			debug_print("<span class=\"red\">$word</span>, "); 
 		} 
 	} 
 } 

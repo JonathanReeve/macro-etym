@@ -1,13 +1,21 @@
 body { 
 	background-color: #181C52;   
+	font-family: 'Rokkitt', serif; 
 } 
 
 .red { 
-	color: red; 
+	color: #7F1E00; 
 } 
 
-.blue { 
-	color: blue; 
+a:link, .blue { 
+	color: #181C52; 
+} 
+
+h1 { 
+	text-align: center; 
+	background-color: #181C52; 
+	color: white; 
+	padding: 10px; 
 } 
 
 table,#piechart { 
