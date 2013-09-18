@@ -162,7 +162,7 @@ debug_print($basic_stats_message);
 function lookup($word) { 
 	//connect to database
 	$query="SELECT parent_lang FROM etym_dict WHERE word=\"$word\" and word_lang=\"eng\""; //making this English-only for now
-	//echo "<p>Query is: $query</p>"; 
+	//debug_print("<p>Query is: $query</p>"); 
 	$result=dbquery($query) 
 	or die("Failed to look up words in database."); 
 	$parent_lang=mysqli_fetch_array($result); 
@@ -170,29 +170,60 @@ function lookup($word) {
 	return $parent_lang; 
 } 
 
+/* Accepts word, looks up root word
+ * Example: input: goes; output: go
+ */
+function lookup_derivation($word) { 
+	$query="SELECT parent_word FROM derivations WHERE word=\"$word\" and word_lang=\"eng\""; //making this English-only for now
+	$result=dbquery($query) 
+	or die("Failed to look up derivation in database."); 
+	$derivation=mysqli_fetch_array($result); 
+	$derivation=trim($derivation[0]); 
+	return $derivation; 
+} 
+
 //initialize list of parent languages
 $parent_langs=array(); 
 $not_in_dict=array(); 
 
-debug_print("<p>Looking up $unique_words words. This may take a while.</p> <p>Looking up: "); 
+$wait_message= "<p>Looking up $unique_words words. "; 
+if ($unique_words<200) { 
+	$wait_message .= " This should just take a second. "; 
+} else if ($unique_words>200 && $unique_words <= 500) { 
+	$wait_message .= " This should take a little while. "; 
+} else if ($unique_words>500 && $unique_words <= 1000) { 
+	$wait_message .= " This will take quite a while. You might want to go make yourself a sandwich. "; 
+} else { 
+	$wait_message .= " This will take a long time. You might want to go for a walk and check back later. "; 
+} 
+$wait_message .= "</p> <p>Looking up: "; 
+
+debug_print($wait_message); 
+
 foreach (array_keys($results) as $word) { 
 	$parent_lang=lookup($word); 
 	if (!empty($parent_lang)) {  
 		$parent_langs[]=array($word,$parent_lang,$results[$word]); 
 		debug_print("$word, "); 
 	} else { 
-		$last_letter=substr($word, -1); 
-		$last_two_letters=substr($word, -2); 
-		if(strlen($word)>2 && $last_letter=="s") { //try version without -s at the end for those words that are bigger than two letters
-			$word = substr($word, 0, -1); 
-			$parent_lang=lookup($word); //using no -s version 
+		$derivation=lookup_derivation($word); 
+		$has_derivation= (strlen($derivation)>0) ? TRUE : FALSE; 
+		if ($has_derivation) { 
+			$parent_lang=lookup($derivation); 
 		} 
-		if(!empty($parent_lang)) { 
+		if(!empty($parent_lang) && $has_derivation) { 
+			debug_print("<span class=\"blue\">$word ($derivation)</span>, "); 
+		} else if(!empty($parent_lang)) { 
 			$parent_langs[]=array($word,$parent_lang,$results[$word]); 
 			debug_print("<span class=\"blue\">$word</span>, "); 
 		} else { 
 			$not_in_dict[]=$word; 
-			debug_print("<span class=\"red\">$word</span>, "); 
+			debug_print("<span class=\"red\">$word"); 
+			if ($has_derivation) { 
+				debug_print("/$derivation</span>, "); 
+			} else { 
+				debug_print("</span>, "); 
+			} 
 		} 
 	} 
 } 
