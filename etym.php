@@ -6,6 +6,21 @@
 <link href='http://fonts.googleapis.com/css?family=Rokkitt:400,700' rel='stylesheet' type='text/css'> 
 <link rel="stylesheet" href="style.css"> 
 
+<script src="js/jquery-1.10.2.min.js"></script> 
+<script src="js/jquery.collapse.js"></script>
+
+<script> 
+$(document).ready(function(){ 
+	//jQuery code here
+
+	$("#wordOutputToggle").click(function(){ 
+		$("#wordOutput").toggle(); 
+	}); 
+	//end jQuery code
+});
+</script> 
+
+
 </head>
 <body> 
 <div id="container"> 
@@ -188,7 +203,11 @@ function lookup_derivation($word) {
 $parent_langs=array(); 
 $not_in_dict=array(); 
 
-debug_print("<p>Looking up $unique_words words.</p> <p>Looking up: "); 
+echo "<p>Looking up $unique_words words.</p>
+	<div id='wordOutputToggle' class='foldToggle'> 
+		Show/hide wordlist
+	</div> 
+	<div id='wordOutput'><p>Looking up:"; 
 
 foreach (array_keys($results) as $word) { 
 	$parent_lang=lookup($word); 
@@ -217,7 +236,7 @@ foreach (array_keys($results) as $word) {
 		} 
 	} 
 } 
-debug_print(" done.</p>"); 
+debug_print(" done.</p></div><!--end #wordOutput-->"); 
 ?> 
 
 <div id="piechart" style="width: 500px; height: 400px;"></div>
