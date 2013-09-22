@@ -102,6 +102,8 @@ debug_print("<p>Cleaning files...");
 //$content = preg_replace( "/\n/", " ", $content );
 //$content = preg_replace( "/\s\s+/", " ", $content );
 
+$content = preg_replace("/--/", " ", $content); 
+
 $content = str_word_count($content,1); //trying a different method for cleaning
 
 debug_print("done.</p>"); 
