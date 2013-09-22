@@ -7,7 +7,6 @@
 <link rel="stylesheet" href="style.css"> 
 
 <script src="js/jquery-1.10.2.min.js"></script> 
-<script src="js/jquery.collapse.js"></script>
 
 <script> 
 $(document).ready(function(){ 
@@ -15,6 +14,12 @@ $(document).ready(function(){
 
 	$("#wordOutputToggle").click(function(){ 
 		$("#wordOutput").toggle(); 
+	}); 
+	$("#wordlistToggle").click(function(){ 
+		$("#wordlist").toggle(); 
+	}); 
+	$("#errorsToggle").click(function(){ 
+		$("#errors").toggle(); 
 	}); 
 	//end jQuery code
 });
@@ -202,13 +207,18 @@ function lookup_derivation($word) {
 //initialize list of parent languages
 $parent_langs=array(); 
 $not_in_dict=array(); 
+echo "<p>Looking up $unique_words words.</p>"; 
+?>
 
-echo "<p>Looking up $unique_words words.</p>
-	<div id='wordOutputToggle' class='foldToggle'> 
-		Show/hide wordlist
-	</div> 
-	<div id='wordOutput'><p>Looking up:"; 
+	<div id="displayControls">
+		<input type="checkbox" id="wordOutputToggle">Hide wordlist</input> 
+		<input type="checkbox" id="wordlistToggle">Hide verbose lookup results</input> 
+		<input type="checkbox" id="errorsToggle">Hide errors</input> 
+	</div><!-- end #displayControls --> 
+	<div id='wordOutput'>
+	<p>Looking up: 
 
+<?php 
 foreach (array_keys($results) as $word) { 
 	$parent_lang=lookup($word); 
 	if (!empty($parent_lang)) {  
@@ -241,7 +251,7 @@ debug_print(" done.</p></div><!--end #wordOutput-->");
 
 <div id="piechart" style="width: 500px; height: 400px;"></div>
 
-<div class="box">
+<div id="errors" class="box">
 <p>Couldn't find these words in the etymology dictionary: </p> 
 <?php foreach ($not_in_dict as $mystery_word) { 
 		echo "$mystery_word, "; 
@@ -250,7 +260,7 @@ debug_print(" done.</p></div><!--end #wordOutput-->");
 </div>
 
 
-<table> 
+<table id="wordlist"> 
 	<th>Word</th>
 	<th>Parent Language</th>
 	<th>Frequency</th>
