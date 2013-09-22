@@ -188,19 +188,7 @@ function lookup_derivation($word) {
 $parent_langs=array(); 
 $not_in_dict=array(); 
 
-$wait_message= "<p>Looking up $unique_words words. "; 
-if ($unique_words<200) { 
-	$wait_message .= " This should just take a second. "; 
-} else if ($unique_words>200 && $unique_words <= 500) { 
-	$wait_message .= " This should take a little while. "; 
-} else if ($unique_words>500 && $unique_words <= 1000) { 
-	$wait_message .= " This will take quite a while. You might want to go make yourself a sandwich. "; 
-} else { 
-	$wait_message .= " This will take a long time. You might want to go for a walk and check back later. "; 
-} 
-$wait_message .= "</p> <p>Looking up: "; 
-
-debug_print($wait_message); 
+debug_print("<p>Looking up $unique_words words.</p> <p>Looking up: "); 
 
 foreach (array_keys($results) as $word) { 
 	$parent_lang=lookup($word); 
