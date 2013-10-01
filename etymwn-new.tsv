@@ -5,3 +5,8 @@ eng: that	rel:etymology	ang: þæt
 eng: them	rel:etymology	non: þeim 
 eng: him	rel:etymology	ang: him
 eng: without	rel:etymology	ang: wiðutan
+eng: mr		rel:is_derived_from	eng: mister
+eng: herself	rel:etymology	ang: hire self
+eng: himself	rel:etymology	ang: him selfum
+eng: thing	rel:etymology	ang: þing
+eng: out	rel:etymology	ang: ut 
