@@ -7,6 +7,7 @@ body {
 	color: #7F1E00; 
 } 
 
+
 a:link, .blue { 
 	color: #181C52; 
 } 
@@ -16,6 +17,14 @@ h1 {
 	background-color: #181C52; 
 	color: white; 
 	padding: 10px; 
+} 
+
+.box h2:after { 
+	content: " (click to hide)"; 
+} 
+
+.box h2.closed:after { 
+	content: " (click to show)"; 
 } 
 
 table,#piechart { 

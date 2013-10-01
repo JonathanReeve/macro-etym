@@ -5,6 +5,7 @@
 <meta charset="utf-8">
 <link href='http://fonts.googleapis.com/css?family=Rokkitt:400,700' rel='stylesheet' type='text/css'> 
 <link rel="stylesheet" href="style.css"> 
+<link href="//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css" rel="stylesheet"> 
 
 <script src="js/jquery-1.10.2.min.js"></script> 
 
@@ -12,15 +13,11 @@
 $(document).ready(function(){ 
 	//jQuery code here
 
-	$("#wordOutputToggle").click(function(){ 
-		$("#wordOutput").toggle(); 
+	$(".box > h2").click(function(){ 
+		$(this).next().slideToggle(); 
+		$(this).toggleClass('closed'); 
 	}); 
-	$("#wordlistToggle").click(function(){ 
-		$("#wordlist").toggle(); 
-	}); 
-	$("#errorsToggle").click(function(){ 
-		$("#errors").toggle(); 
-	}); 
+
 	//end jQuery code
 });
 </script> 
@@ -210,12 +207,12 @@ $not_in_dict=array();
 echo "<p>Looking up $unique_words words.</p>"; 
 ?>
 
-	<div id="displayControls">
-		<input type="checkbox" id="wordOutputToggle">Hide wordlist</input> 
-		<input type="checkbox" id="wordlistToggle">Hide verbose lookup results</input> 
-		<input type="checkbox" id="errorsToggle">Hide errors</input> 
-	</div><!-- end #displayControls --> 
-	<div id='wordOutput'>
+<div id="piechart" style="width: 800px; height: 400px;"></div>
+
+	<div id="wordOutput" class="box">
+<h2>Words</h2> 
+<div class="boxContent"> 
+<p class="caption">Looking up the following words in the etymology dictionary. <span class="red">Red words</span> could not be found in the dictionary (a full list follows), and <span class="blue">blue words</span> could not be found in their written forms, but were found in their root forms (given in parentheses).</p> 
 	<p>Looking up: 
 
 <?php 
@@ -246,20 +243,26 @@ foreach (array_keys($results) as $word) {
 		} 
 	} 
 } 
-debug_print(" done.</p></div><!--end #wordOutput-->"); 
+debug_print("done.</p>"); 
 ?> 
 
-<div id="piechart" style="width: 500px; height: 400px;"></div>
+</div><!--end .boxContent-->
+</div><!--end #wordOutput--> 
 
 <div id="errors" class="box">
-<p>Couldn't find these words in the etymology dictionary: </p> 
+<h2>Errors</h2>
+<div class="boxContent">
+<p class="caption">Couldn't find these words in the etymology dictionary: </p> 
 <?php foreach ($not_in_dict as $mystery_word) { 
-		echo "$mystery_word, "; 
+	echo "$mystery_word, "; 
 } ?> 
 </p>
-</div>
+</div><!--end .boxContent--> 
+</div><!--end of .box--> 
 
-
+<div class="box"> 
+<h2>Individual Etymologies</h2> 
+<div class="boxContent"> 
 <table id="wordlist"> 
 	<th>Word</th>
 	<th>Parent Language</th>
@@ -291,7 +294,12 @@ foreach($parent_langs as $wordResult) {
 ?> 
 
 </table>
+</div><!--end .boxContent --> 
+</div><!--end .box --> 
 
+<div class="box"> 
+<h2>First-Generation Languages</h2> 
+<div class="boxContent"> 
 <table> 
 	<th>Code</th>
 	<th>Language</th>
@@ -339,7 +347,12 @@ $families['Unknown']=count($not_in_dict);
 ?> 
 
 </table>
+</div><!--end .boxContent --> 
+</div><!--end .box --> 
 
+<div class="box"> 
+<h2>First-Generation Language Families</h2> 
+<div class="boxContent"> 
 <table> 
 <th>Family</th>
 <th># Words</th>
@@ -348,6 +361,8 @@ $families['Unknown']=count($not_in_dict);
 } ?> 
 
 </table> 
+</div><!--end .boxContent --> 
+</div><!--end .box --> 
 
 <script type="text/javascript" src="https://www.google.com/jsapi"></script>
     <script type="text/javascript">
