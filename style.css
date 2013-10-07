@@ -15,9 +15,37 @@ a:link, .blue {
 
 h1 { 
 	text-align: center; 
-	background-color: #181C52; 
+	font-size: 50px; 
+	text-shadow: 3px 2px 1px rgba(0, 0, 0, 0.5);  
+	background-color: #181C83; 
 	color: white; 
 	padding: 10px; 
+	position: absolute; 
+	left: 0; 
+	right: 0; 
+	margin: 0 auto; 
+	width: 80%; 
+	box-shadow: 1px 1px 1px #000; 
+} 
+
+.padding { 
+	margin: 40px 10px; /* absolute positioning on the header makes this necessary */ 
+} 
+
+#piechart { 
+	position: relative; 
+	left: 30px; /* fixes centering problem with piechart */  
+} 
+
+.box h2 { 
+	text-decoration: none; 
+	background-color: #181C82; 
+	color: white; 
+	padding: 10px; 
+} 
+
+.box h2:hover {  
+	background-color: #181CC3; 
 } 
 
 .box h2:before { 
@@ -28,15 +56,6 @@ h1 {
 .box h2.closed:before { 
 	font-family: 'FontAwesome'; /* Use Font Awesome to draw caret icons */  
 	content: "\f0da  "; /* icon-caret-right */ 
-} 
-
-h2.boxControl { 
-	color: #181C52; 
-	text-decoration: none; 
-} 
-
-h2.boxControl:hover { 
-	color: blue; 
 } 
 
 
@@ -63,15 +82,24 @@ tr:nth-child(even) {
 	background-color: #CDD3FF;  
 } 
 
-.box { 
-	margin: 50px; 
-	border: 1px dashed #181F52; 
-	padding: 10px; 
-} 
-
 #container { 
 	background-color: #fff; 
 	width: 70%;  
 	margin: 0 auto; 
-	padding: 50px; 
+	padding: 30px 50px; 
+} 
+
+footer { 
+	position: relative; 
+	top: -35px; 
+	background-color: #0E1130;  
+	color: white; 
+	padding: 40px; 
+	margin: 0 auto; 
+	margin-top: 30px; 
+	width: 80%; 
+} 
+
+footer a:link { 
+	color: #AAB5FF;  
 } 

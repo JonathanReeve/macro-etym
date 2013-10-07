@@ -29,6 +29,8 @@ $(document).ready(function(){
 
 <h1>Macro-Etymological Analyzer</h1> 
 
+<p class="padding">&nbsp; &nbsp;</p> <!-- fix for absolutely-positioned h1 element above --> 
+
 <?php if($_SERVER['REQUEST_METHOD'] !== "POST"):  ?> 
 
 <p>This program will run a frequency analysis on your text, then look up each word in the word frequency list using the Etymological Wordnet. It's not very efficient at the moment, so please be patient as it looks up all the words.</p> 
@@ -112,21 +114,11 @@ $content = file_get_contents($test_filename);
 if ( !$content )
 	die( 'No file to analyze. Ergo, nothing to do.' );
 
-
-//strip out bad characters
-debug_print("<p>Cleaning files..."); 
-//$content = preg_replace( "/(,|\"|\.|\?|:|!|;| - )/", " ", $content );
-//$content = preg_replace( "/\n/", " ", $content );
-//$content = preg_replace( "/\s\s+/", " ", $content );
-
 $content = preg_replace("/--/", " ", $content); 
 
 $content = str_word_count($content,1); //trying a different method for cleaning
 
-debug_print("done.</p>"); 
-
 //split content on words
-//$content = split(" ",$content);
 $words = Array();
 
 /**
@@ -169,9 +161,7 @@ function build_stats($input,$num) {
 	return $results;
 }
 
-debug_print("<p>Building statistics..."); 
 $results = build_stats($content, 1); 
-debug_print("done.</p>"); 
 
 $num_words = count($content); 
 $unique_words = count($results); 
@@ -207,7 +197,7 @@ $not_in_dict=array();
 echo "<p>Looking up $unique_words words.</p>"; 
 ?>
 
-<div id="piechart" style="width: 800px; height: 400px;">
+<div id="piechart" style="width: 100%; height: 400px;">
 </div>
 
 <div id="wordOutput" class="box">
@@ -406,9 +396,11 @@ $families['Unknown']=count($not_in_dict);
 
 <?php endif; ?> 
 
+</div> <!-- end of #container --> 
+
 <footer> 
+<p>Created by Jonathan Reeve. Released under the GPLv3.</p> 
 <p>Examine or fork the source code for this program at <a href="http://github.com/JonathanReeve/bulk-etym/">http://github.com/JonathanReeve/bulk-etym/</a>.</p>  
 </footer>    
-</div> <!-- end of #container --> 
 </body>    
 </html>    
