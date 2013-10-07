@@ -12,6 +12,7 @@ a:link, .blue {
 	color: #181C52; 
 } 
 
+
 h1 { 
 	text-align: center; 
 	background-color: #181C52; 
@@ -19,13 +20,25 @@ h1 {
 	padding: 10px; 
 } 
 
-.box h2:after { 
-	content: " (click to hide)"; 
+.box h2:before { 
+	font-family: 'FontAwesome'; /* Use Font Awesome to draw caret icons */  
+	content: "\f0d7  "; /* icon-caret-down */ 
 } 
 
-.box h2.closed:after { 
-	content: " (click to show)"; 
+.box h2.closed:before { 
+	font-family: 'FontAwesome'; /* Use Font Awesome to draw caret icons */  
+	content: "\f0da  "; /* icon-caret-right */ 
 } 
+
+h2.boxControl { 
+	color: #181C52; 
+	text-decoration: none; 
+} 
+
+h2.boxControl:hover { 
+	color: blue; 
+} 
+
 
 table,#piechart { 
 	margin: 10px auto; 

@@ -207,13 +207,14 @@ $not_in_dict=array();
 echo "<p>Looking up $unique_words words.</p>"; 
 ?>
 
-<div id="piechart" style="width: 800px; height: 400px;"></div>
+<div id="piechart" style="width: 800px; height: 400px;">
+</div>
 
-	<div id="wordOutput" class="box">
-<h2>Words</h2> 
-<div class="boxContent"> 
-<p class="caption">Looking up the following words in the etymology dictionary. <span class="red">Red words</span> could not be found in the dictionary (a full list follows), and <span class="blue">blue words</span> could not be found in their written forms, but were found in their root forms (given in parentheses).</p> 
-	<p>Looking up: 
+<div id="wordOutput" class="box">
+	<h2>Words</h2> 
+	<div class="boxContent"> 
+		<p class="caption">Looking up the following words in the etymology dictionary. <span class="red">Red words</span> could not be found in the dictionary (a full list follows), and <span class="blue">blue words</span> could not be found in their written forms, but were found in their root forms (given in parentheses).</p> 
+		<p>Looking up: 
 
 <?php 
 foreach (array_keys($results) as $word) { 
@@ -221,6 +222,9 @@ foreach (array_keys($results) as $word) {
 	if (!empty($parent_lang)) {  
 		$parent_langs[]=array($word,$parent_lang,$results[$word]); 
 		debug_print("$word, "); 
+		if ($parent_lang == "enm") { 
+			$enm_words[]=$word; 
+		} 
 	} else { 
 		$derivation=lookup_derivation($word); 
 		$has_derivation= (strlen($derivation)>0) ? TRUE : FALSE; 
@@ -259,6 +263,19 @@ debug_print("done.</p>");
 </p>
 </div><!--end .boxContent--> 
 </div><!--end of .box--> 
+
+<?php if ($enm_words !== NULL): ?> 
+<div id="me_words" class="box">
+<h2>Middle English Words</h2>
+<div class="boxContent">
+<p class="caption">Here are the Middle English Words: </p> 
+<?php foreach ($enm_words as $enm_word) { 
+	echo "$enm_word, "; 
+} ?> 
+</p>
+</div><!--end .boxContent--> 
+</div><!--end of .box--> 
+<?php endif; ?> 
 
 <div class="box"> 
 <h2>Individual Etymologies</h2> 
