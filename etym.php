@@ -22,7 +22,6 @@ $(document).ready(function(){
 });
 </script> 
 
-
 </head>
 <body> 
 <div id="container"> 
@@ -170,12 +169,11 @@ debug_print($basic_stats_message);
 
 function lookup($word) { 
 	//connect to database
-	$query="SELECT parent_lang FROM etym_dict WHERE word=\"$word\" and word_lang=\"eng\""; //making this English-only for now
+	$query="SELECT parent_lang, parent_word FROM etym_dict WHERE word=\"$word\" and word_lang=\"eng\""; //making this English-only for now
 	//debug_print("<p>Query is: $query</p>"); 
 	$result=dbquery($query) 
 	or die("Failed to look up words in database."); 
 	$parent_lang=mysqli_fetch_array($result); 
-	$parent_lang=$parent_lang[0]; 
 	return $parent_lang; 
 } 
 
@@ -187,7 +185,7 @@ function lookup_derivation($word) {
 	$result=dbquery($query) 
 	or die("Failed to look up derivation in database."); 
 	$derivation=mysqli_fetch_array($result); 
-	$derivation=trim($derivation[0]); 
+	$derivation=strtolower(trim($derivation[0])); 
 	return $derivation; 
 } 
 
@@ -208,7 +206,9 @@ echo "<p>Looking up $unique_words words.</p>";
 
 <?php 
 foreach (array_keys($results) as $word) { 
-	$parent_lang=lookup($word); 
+	$parent=lookup($word); 
+	$parent_lang=$parent[0]; 
+	$parent_word=$parent[1];  
 	if (!empty($parent_lang)) {  
 		$parent_langs[]=array($word,$parent_lang,$results[$word]); 
 		debug_print("$word, "); 
@@ -254,18 +254,6 @@ debug_print("done.</p>");
 </div><!--end .boxContent--> 
 </div><!--end of .box--> 
 
-<?php if ($enm_words !== NULL): ?> 
-<div id="me_words" class="box">
-<h2>Middle English Words</h2>
-<div class="boxContent">
-<p class="caption">Here are the Middle English Words: </p> 
-<?php foreach ($enm_words as $enm_word) { 
-	echo "$enm_word, "; 
-} ?> 
-</p>
-</div><!--end .boxContent--> 
-</div><!--end of .box--> 
-<?php endif; ?> 
 
 <div class="box"> 
 <h2>Individual Etymologies</h2> 
@@ -351,6 +339,11 @@ foreach($lang_count as $lang => $count) { //loop through the raw languages list
 } 
 
 $families['Unknown']=count($not_in_dict); 
+$families_total = array_sum(array_values($families)); 
+foreach($families as $family => $count) { 
+	$family_percentage = round(($count / $families_total * 100), 2);  
+	$families[$family] = array($count, $family_percentage); 
+} 
 ?> 
 
 </table>
@@ -363,13 +356,69 @@ $families['Unknown']=count($not_in_dict);
 <table> 
 <th>Family</th>
 <th># Words</th>
+<th>Percentage</th>
 <?php foreach ($families as $family => $count) { 
-	echo "<tr><td>$family</td><td>$count</td>"; 
+	$count = $count[0]; 
+	$perc = $count[1]; 
+	echo "<tr><td>$family</td><td>$count</td><td>$perc</td></tr>"; 
 } ?> 
 
 </table> 
 </div><!--end .boxContent --> 
 </div><!--end .box --> 
+
+<?php if ($enm_words !== NULL): ?> 
+<div id="me_words" class="box">
+<h2>Middle English Words</h2>
+<div class="boxContent">
+<p class="caption">Here are the Middle English Words: </p> 
+<?php foreach ($enm_words as $enm_word) { 
+	echo "$enm_word, "; 
+} ?> 
+</p>
+</div><!--end .boxContent--> 
+</div><!--end of .box--> 
+<?php endif; ?> 
+
+<div id="cum_results" class="box">
+<h2>Logging</h2>
+<div class="boxContent">
+<p class="caption">Log file: </p> 
+
+<?php // logging
+$logfile = 'log.txt'; 
+echo "Families: "; 
+print_r($families); 
+$log_content = join(',', array($test_filename, $families["Germanic"][1],$families["Latinate"][1],$families["Hellenic"][1],$families["Unknown"][1])) . "\n"; 
+
+// Let's make sure the file exists and is writable first.
+if (is_writable($logfile)) {
+
+    // In our example we're opening $filename in append mode.
+    // The file pointer is at the bottom of the file hence
+    // that's where $log_content will go when we fwrite() it.
+    if (!$handle = fopen($logfile, 'a')) {
+         echo "Cannot open file ($logfile)";
+         exit;
+    }
+
+    // Write $log_content to our opened file.
+    if (fwrite($handle, $log_content) === FALSE) {
+        echo "Cannot write to file ($logfile)";
+        exit;
+    }
+
+    echo "<p>Success, wrote ($log_content) to file <a href='$logfile'>($logfile)</a></p>";
+
+    fclose($handle);
+
+} else {
+    echo "The file $logfile is not writable";
+}
+?> 
+</p>
+</div><!--end .boxContent--> 
+</div><!--end of .box--> 
 
 <script type="text/javascript" src="https://www.google.com/jsapi"></script>
     <script type="text/javascript">
@@ -379,6 +428,7 @@ $families['Unknown']=count($not_in_dict);
         var data = google.visualization.arrayToDataTable([
 		['Family', 'Count'],
 <?php foreach ($families as $family => $count) { 
+	$count = $count[0]; 
 	echo "['$family', $count],"; 
 } ?> 
 	]); 
