@@ -358,9 +358,9 @@ foreach($families as $family => $count) {
 <th># Words</th>
 <th>Percentage</th>
 <?php foreach ($families as $family => $count) { 
-	$count = $count[0]; 
+	$raw_count = $count[0]; 
 	$perc = $count[1]; 
-	echo "<tr><td>$family</td><td>$count</td><td>$perc</td></tr>"; 
+	echo "<tr><td>$family</td><td>$raw_count</td><td>$perc</td></tr>"; 
 } ?> 
 
 </table> 
