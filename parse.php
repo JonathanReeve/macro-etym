@@ -34,6 +34,9 @@ debug_print("Connected to database.");
 
 debug_print("Creating tables."); 
 //make the table
+$result=dbquery("DROP TABLE IF EXISTS etym_dict") 
+	or die ("Couldn't delete existing data before reparsing."); 
+
 $result=dbquery("CREATE TABLE IF NOT EXISTS etym_dict ( 
 	word VARCHAR(30),
 	word_lang CHAR(3),
