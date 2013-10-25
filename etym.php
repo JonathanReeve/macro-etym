@@ -115,6 +115,8 @@ if ( !$content )
 
 $content = preg_replace("/--/", " ", $content); 
 
+$content = strip_tags($content); //make sure there aren't any HTML or TEI tags here
+
 $content = str_word_count($content,1); //trying a different method for cleaning
 
 //split content on words
@@ -167,9 +169,15 @@ $unique_words = count($results);
 $basic_stats_message = "<p>This text contains $num_words words, of which $unique_words are unique.</p>"; 
 debug_print($basic_stats_message); 
 
-function lookup($word) { 
+function lookup($word, $enm=FALSE) { 
+	$word = trim($word); //strip whitespace from beginning and end of word just in case
 	//connect to database
-	$query="SELECT parent_lang, parent_word FROM etym_dict WHERE word=\"$word\" and word_lang=\"eng\""; //making this English-only for now
+	if($enm==TRUE) { 
+		//echo "Looking up middle english word $word."; 
+		$query="SELECT parent_lang, parent_word FROM etym_dict WHERE word=\"$word\" AND word_lang=\"enm\""; //making this English-only for now
+	} else { 
+		$query="SELECT parent_lang, parent_word FROM etym_dict WHERE word=\"$word\" and word_lang=\"eng\""; //making this English-only for now
+	} 
 	//debug_print("<p>Query is: $query</p>"); 
 	$result=dbquery($query) 
 	or die("Failed to look up words in database."); 
@@ -191,6 +199,7 @@ function lookup_derivation($word) {
 
 //initialize list of parent languages
 $parent_langs=array(); 
+$grandparent_langs=array(); 
 $not_in_dict=array(); 
 echo "<p>Looking up $unique_words words.</p>"; 
 ?>
@@ -201,30 +210,56 @@ echo "<p>Looking up $unique_words words.</p>";
 <div id="wordOutput" class="box">
 	<h2>Words</h2> 
 	<div class="boxContent"> 
-		<p class="caption">Looking up the following words in the etymology dictionary. <span class="red">Red words</span> could not be found in the dictionary (a full list follows), and <span class="blue">blue words</span> could not be found in their written forms, but were found in their root forms (given in parentheses).</p> 
+		<p class="caption">Looking up the following words in the etymology dictionary. <span class="red">Red words</span> could not be found in the dictionary (a full list follows), and <span class="blue">blue words</span> could not be found in their written forms, but were found in their root forms (given in parentheses). Green words were Middle English words not found in the dictionary. </p> 
 		<p>Looking up: 
 
 <?php 
 foreach (array_keys($results) as $word) { 
 	$parent=lookup($word); 
+	//debug_print("Parent is: "); 
+	//print_r($parent);  
 	$parent_lang=$parent[0]; 
-	$parent_word=$parent[1];  
-	if (!empty($parent_lang)) {  
+	$parent_word=trim($parent[1]);  
+	if (!empty($parent_lang)) { //found it 
 		$parent_langs[]=array($word,$parent_lang,$results[$word]); 
 		debug_print("$word, "); 
 		if ($parent_lang == "enm") { 
 			$enm_words[]=$word; 
+			//debug_print("Looking up parent word: $parent_word ."); 
+			$grandparent = lookup($parent_word, $enm=TRUE); 
+			//echo "Grandparent is: "; 
+			//print_r($grandparent); 
+			$grandparent_lang = $grandparent[0]; 
+			if (!empty($grandparent_lang)) { 
+				$grandparent_langs[]=array($word,$grandparent_lang,$results[$word]);
+			} else { 
+				$not_in_dict_2g[]=$parent_word; 
+				debug_print("<span class=\"green\">$parent_word</span>, "); 
+			} 	
+		} else { // add non-enm words to second-generation list
+			$grandparent_langs[]=array($word,$parent_lang,$results[$word]); 
 		} 
-	} else { 
-		$derivation=lookup_derivation($word); 
+	} else if(strpos($word, "-") !== FALSE) { //try hyphenated words 
+			$hyphenated_word_pieces = explode("-", $word); 
+			foreach ($hyphenated_word_pieces as $word_piece) { 
+				$parent=lookup($word_piece); //FIXME: Don't repeat yourself
+				$parent_lang=$parent[0]; 
+				$parent_langs[]=array($word_piece,$parent_lang,$results[$word]); 
+				debug_print("$word_piece, "); 
+			} 
+	} else { // try derivations 
+		$derivation=strtolower(lookup_derivation($word)); 
 		$has_derivation= (strlen($derivation)>0) ? TRUE : FALSE; 
 		if ($has_derivation) { 
-			$parent_lang=lookup($derivation); 
+			$parent=lookup($derivation); //FIXME: Don't repeat yourself
+			$parent_lang=$parent[0]; 
+			$parent_word=trim($parent[1]);  
 		} 
 		if(!empty($parent_lang) && $has_derivation) { 
 			debug_print("<span class=\"blue\">$word ($derivation)</span>, "); 
 		} else if(!empty($parent_lang)) { 
 			$parent_langs[]=array($word,$parent_lang,$results[$word]); 
+			$grandparent_langs[]=array($word,$parent_lang,$results[$word]);
 			debug_print("<span class=\"blue\">$word</span>, "); 
 		} else { 
 			$not_in_dict[]=$word; 
@@ -238,6 +273,8 @@ foreach (array_keys($results) as $word) {
 	} 
 } 
 debug_print("done.</p>"); 
+//echo "Grandparent langs: "; 
+//print_r($grandparent_langs); 
 ?> 
 
 </div><!--end .boxContent-->
@@ -250,7 +287,10 @@ debug_print("done.</p>");
 <?php foreach ($not_in_dict as $mystery_word) { 
 	echo "$mystery_word, "; 
 } ?> 
-</p>
+<p class="caption">Upon second-generation etymology, couldn't find these Middle English words in the dictionary: </p> 
+<?php foreach ($not_in_dict_2g as $mystery_word) { 
+	echo "$mystery_word, "; 
+} ?> 
 </div><!--end .boxContent--> 
 </div><!--end of .box--> 
 
@@ -265,7 +305,6 @@ debug_print("done.</p>");
 
 <?php
 $lang_count=array(); 
-
 
 foreach($parent_langs as $wordResult) { 
 	$word=$wordResult[0];
@@ -284,6 +323,42 @@ foreach($parent_langs as $wordResult) {
 		} 
 	} else { //if it is, increment the count
 		$lang_count[$pl]=$lang_count[$pl]+$freq; 
+	} 	
+} 
+?> 
+
+</table>
+</div><!--end .boxContent --> 
+</div><!--end .box --> 
+
+<div class="box"> 
+<h2>Second-Generation Individual Etymologies</h2> 
+<div class="boxContent"> 
+<table id="wordlist2"> 
+	<th>Word</th>
+	<th>(Grand)parent Language</th>
+	<th>Frequency</th>
+
+<?php
+$gp_lang_count=array(); 
+
+foreach($grandparent_langs as $wordResult) { 
+	$word=$wordResult[0];
+	$pl=$wordResult[1]; 
+	$freq=intval($wordResult[2]); 
+	echo "<tr>
+		<td>$word</td>
+		<td>$pl</td>
+		<td>$freq</td>
+		</tr>"; 
+ 	if (strlen($pl)>1 && !$lang_count[$pl]) { //check to see if the parent language is already in the tally
+		if ($freq>1) { 
+			$gp_lang_count[$pl]=$freq; 
+		} else { 
+			$gp_lang_count[$pl]=1; 
+		} 
+	} else { //if it is, increment the count
+		$gp_lang_count[$pl]=$gp_lang_count[$pl]+$freq; 
 	} 	
 } 
 ?> 
@@ -350,6 +425,47 @@ foreach($families as $family => $count) {
 </div><!--end .boxContent --> 
 </div><!--end .box --> 
 
+
+<div class="box"> 
+<h2>Second-Generation Languages</h2> 
+<div class="boxContent"> 
+<table> 
+	<th>Code</th>
+	<th>Language</th>
+	<th># Words</th>
+	<th>Percentage</th>
+
+<?php 
+
+foreach($gp_lang_count as $lang => $count) { //loop through the raw languages list 
+	foreach($lang_tree as $lang_family => $lang_children) { //count languages according to their language families 
+		if (in_array($lang, $lang_children)) { 
+			$gp_families[$lang_family] = $gp_families[$lang_family]+$count; 
+		} 
+	} 
+	$percentage = round(($count/$num_words*100), 2); 
+	$lang_full = look_up_lang($lang); 
+	echo "<tr> 
+		<td>$lang</td>
+		<td>$lang_full</td> 
+		<td>$count</td>
+		<td>$percentage</td> 
+		</tr>"; 
+} 
+
+$gp_families['Unknown']=count($not_in_dict); 
+$gp_families_total = array_sum(array_values($families)); 
+foreach($gp_families as $family => $count) { 
+	$gp_family_percentage = round(($count / $families_total * 100), 2);  
+	$gp_families[$family] = array($count, $gp_family_percentage); 
+} 
+
+?> 
+
+</table>
+</div><!--end .boxContent --> 
+</div><!--end .box --> 
+
 <div class="box"> 
 <h2>First-Generation Language Families</h2> 
 <div class="boxContent"> 
@@ -362,12 +478,27 @@ foreach($families as $family => $count) {
 	$perc = $count[1]; 
 	echo "<tr><td>$family</td><td>$raw_count</td><td>$perc</td></tr>"; 
 } ?> 
-
 </table> 
 </div><!--end .boxContent --> 
 </div><!--end .box --> 
 
-<?php if ($enm_words !== NULL): ?> 
+<div class="box"> 
+<h2>Second-Generation Language Families</h2> 
+<div class="boxContent"> 
+<table> 
+<th>Family</th>
+<th># Words</th>
+<th>Percentage</th>
+<?php foreach ($gp_families as $family => $count) { 
+	$raw_count = $count[0]; 
+	$perc = $count[1]; 
+	echo "<tr><td>$family</td><td>$raw_count</td><td>$perc</td></tr>"; 
+} ?> 
+</table> 
+</div><!--end .boxContent --> 
+</div><!--end .box --> 
+
+<?php if ($enm_words == "disabling this. make it !==NULL to reenable it"): ?> 
 <div id="me_words" class="box">
 <h2>Middle English Words</h2>
 <div class="boxContent">
@@ -380,23 +511,20 @@ foreach($families as $family => $count) {
 </div><!--end of .box--> 
 <?php endif; ?> 
 
-<div id="cum_results" class="box">
+<div id="log" class="box">
 <h2>Logging</h2>
 <div class="boxContent">
 <p class="caption">Log file: </p> 
 
 <?php // logging
 $logfile = 'log.txt'; 
-echo "Families: "; 
-print_r($families); 
-$log_content = join(',', array($test_filename, $families["Germanic"][1],$families["Latinate"][1],$families["Hellenic"][1],$families["Unknown"][1])) . "\n"; 
+//echo "Families: "; 
+//print_r($families); 
+$log_content = join(',', array($test_filename, $families["Germanic"][1],$families["Latinate"][1],$families["Hellenic"][1],$families["Unknown"][1])) . "\n"; //only using these families for now
 
 // Let's make sure the file exists and is writable first.
 if (is_writable($logfile)) {
 
-    // In our example we're opening $filename in append mode.
-    // The file pointer is at the bottom of the file hence
-    // that's where $log_content will go when we fwrite() it.
     if (!$handle = fopen($logfile, 'a')) {
          echo "Cannot open file ($logfile)";
          exit;
