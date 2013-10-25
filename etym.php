@@ -244,8 +244,10 @@ foreach (array_keys($results) as $word) {
 			foreach ($hyphenated_word_pieces as $word_piece) { 
 				$parent=lookup($word_piece); //FIXME: Don't repeat yourself
 				$parent_lang=$parent[0]; 
-				$parent_langs[]=array($word_piece,$parent_lang,$results[$word]); 
-				debug_print("$word_piece, "); 
+				if (!empty($parent_lang)) { 
+					$parent_langs[]=array($word_piece,$parent_lang,$results[$word]); 
+					debug_print("$word_piece, "); 
+				} 
 			} 
 	} else { // try derivations 
 		$derivation=strtolower(lookup_derivation($word)); 

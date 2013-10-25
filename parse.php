@@ -33,9 +33,9 @@ include('dblayer.php');
 debug_print("Connected to database."); 
 
 debug_print("Creating tables."); 
-//make the table
-$result=dbquery("DROP TABLE IF EXISTS etym_dict") 
-	or die ("Couldn't delete existing data before reparsing."); 
+//disabling this for now to allow for adding new data
+//$result=dbquery("DROP TABLE IF EXISTS etym_dict") 
+//	or die ("Couldn't delete existing data before reparsing."); 
 
 $result=dbquery("CREATE TABLE IF NOT EXISTS etym_dict ( 
 	word VARCHAR(30),
@@ -112,7 +112,7 @@ function parse($line) {
 } 
 
 //open the etymological wordnet for parsing
-$handle = fopen("etymwn.tsv", 'r'); 
+$handle = fopen("etymwn-new.tsv", 'r'); 
 if ($handle) {
     while (($line = fgets($handle, 4096)) !== false ) {
         parse($line);

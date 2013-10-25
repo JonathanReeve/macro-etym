@@ -12,6 +12,14 @@ a:link, .blue {
 	color: #181C52; 
 } 
 
+.green { 
+	color: green; 
+} 
+
+.caption { 
+	font-size: larger; 
+	font-weight: bold; 
+} 
 
 h1 { 
 	text-align: center; 
