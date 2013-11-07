@@ -126,6 +126,10 @@ function parse($line) {
 			return; 
 		} 
 
+		if($parent_word[0]=="-") { //don't parse parent words that begin with a hyphen, because they are probably parts of words like -tion, which aren't as useful for this purpose 
+			return; 
+		} 
+
 		if($word_numwords==1) { //add only single words to database
 			$query="INSERT INTO derivations(word, word_lang,parent_word, parent_lang) VALUES (\"$word\",\"$word_lang\", \"$parent_word\", \"$parent_lang\")"; 
 			$result=dbquery($query)

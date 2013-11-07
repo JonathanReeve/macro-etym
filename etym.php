@@ -252,20 +252,22 @@ foreach (array_keys($results) as $word) {
 	} else { // try derivations 
 		$derivation=strtolower(lookup_derivation($word)); 
 		$has_derivation = (strlen($derivation)>0) ? TRUE : FALSE; 
-		$derivation_count = 0; 
-		while ($has_derivation) { 
-			$derivation_count++;  
-			$derivation=strtolower(lookup_derivation($derivation)); //keep looking up derivations
-			$has_derivation= (strlen($derivation)>0) ? TRUE : FALSE; 
-			if ($derivation_count > 4) { 
-				debug_print("Skipping derivation word $derivation, because it's causing an infinite loop."); 
-				break;  
+		if($has_derivation) { 
+			//debug_print("Trying derivation: $derivation. "); 
+			$parent=lookup($derivation); //FIXME: Don't repeat yourself
+			if(!empty($parent)) { 
+				$parent_lang=$parent[0]; 
+				$parent_word=trim($parent[1]);  
+			} else { 
+				$derivation=strtolower(lookup_derivation($derivation)); //try second derivation 
+				$has_derivation = (strlen($derivation)>0) ? TRUE : FALSE; 
+				$parent=lookup($derivation); 
+				if(!empty($parent)){ 
+					$parent_lang=$parent[0]; 
+					$parent_word=trim($parent[1]);  
+				} 
 			} 
 		} 
-		$parent=lookup($derivation); //FIXME: Don't repeat yourself
-		$parent_lang=$parent[0]; 
-		$parent_word=trim($parent[1]);  
-
 		if(!empty($parent_lang) && $has_derivation) { 
 			debug_print("<span class=\"blue\">$word ($derivation)</span>, "); 
 		} else if(!empty($parent_lang)) { 
