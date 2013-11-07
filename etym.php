@@ -32,7 +32,7 @@ $(document).ready(function(){
 
 <?php if($_SERVER['REQUEST_METHOD'] !== "POST"):  ?> 
 
-<p>This program will run a frequency analysis on your text, then look up each word in the word frequency list using the Etymological Wordnet. It's not very efficient at the moment, so please be patient as it looks up all the words.</p> 
+<p>This program will run a frequency analysis on your text, look up each word using the Etymological Wordnet, then tally the words according to origin language family.</p> 
 
 <form enctype="multipart/form-data" action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post"> 
 <p><label for="file">Upload a file:</label> 
