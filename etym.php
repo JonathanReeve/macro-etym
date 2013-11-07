@@ -251,12 +251,21 @@ foreach (array_keys($results) as $word) {
 			} 
 	} else { // try derivations 
 		$derivation=strtolower(lookup_derivation($word)); 
-		$has_derivation= (strlen($derivation)>0) ? TRUE : FALSE; 
-		if ($has_derivation) { 
-			$parent=lookup($derivation); //FIXME: Don't repeat yourself
-			$parent_lang=$parent[0]; 
-			$parent_word=trim($parent[1]);  
+		$has_derivation = (strlen($derivation)>0) ? TRUE : FALSE; 
+		$derivation_count = 0; 
+		while ($has_derivation) { 
+			$derivation_count++;  
+			$derivation=strtolower(lookup_derivation($derivation)); //keep looking up derivations
+			$has_derivation= (strlen($derivation)>0) ? TRUE : FALSE; 
+			if ($derivation_count > 4) { 
+				debug_print("Skipping derivation word $derivation, because it's causing an infinite loop."); 
+				break;  
+			} 
 		} 
+		$parent=lookup($derivation); //FIXME: Don't repeat yourself
+		$parent_lang=$parent[0]; 
+		$parent_word=trim($parent[1]);  
+
 		if(!empty($parent_lang) && $has_derivation) { 
 			debug_print("<span class=\"blue\">$word ($derivation)</span>, "); 
 		} else if(!empty($parent_lang)) { 
@@ -290,8 +299,11 @@ debug_print("done.</p>");
 	echo "$mystery_word, "; 
 } ?> 
 <p class="caption">Upon second-generation etymology, couldn't find these Middle English words in the dictionary: </p> 
-<?php foreach ($not_in_dict_2g as $mystery_word) { 
-	echo "$mystery_word, "; 
+<?php 
+if (!empty($not_in_dict_2g)) { 	
+	foreach ($not_in_dict_2g as $mystery_word) { 
+		echo "$mystery_word, "; 
+	} 
 } ?> 
 </div><!--end .boxContent--> 
 </div><!--end of .box--> 

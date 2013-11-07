@@ -16,6 +16,11 @@ function debug_print($text) {
 	flush(); 
 } 
 
+function starts_with_upper($str) {
+    $chr = mb_substr ($str, 0, 1, "UTF-8");
+    return mb_strtolower($chr, "UTF-8") != $chr;
+} 
+
 debug_print("This script parses etymwn.tsv, the Etymological Wordnet, into a mySQL database. Don't run this script twice, otherwise it'll create duplicate entries in the database."); 
 
 debug_print("Starting. Connecting..."); 
@@ -32,10 +37,13 @@ include('dblayer.php');
 
 debug_print("Connected to database."); 
 
-debug_print("Creating tables."); 
-//disabling this for now to allow for adding new data
-//$result=dbquery("DROP TABLE IF EXISTS etym_dict") 
-//	or die ("Couldn't delete existing data before reparsing."); 
+debug_print("Deleting old tables and creating new ones."); 
+
+$result=dbquery("DROP TABLE IF EXISTS etym_dict") 
+	or die ("Couldn't delete existing data before reparsing."); 
+
+$result=dbquery("DROP TABLE IF EXISTS derivations") 
+	or die ("Couldn't delete existing derivations table before reparsing."); 
 
 $result=dbquery("CREATE TABLE IF NOT EXISTS etym_dict ( 
 	word VARCHAR(30),
@@ -81,6 +89,15 @@ function parse($line) {
 		//echo "<p>Word lang: $word_lang</p>"; 
 		//echo "<p>Parent lang: $parent_lang</p>"; 
 		//echo "<p>Parent Word: $parent_word</p>"; 
+		
+		if($word_lang !== "eng"){ //only English words for now. 
+			return; 
+		} 
+
+		if(starts_with_upper($word)) { //skip words that begin with uppercase, since they're probably names. 
+			//debug_print("Skipping word $word, since it's probably a name."); 
+			return; 
+		} 
 
 		$query="INSERT INTO etym_dict(word, word_lang,parent_word, parent_lang) VALUES (\"$word\",\"$word_lang\", \"$parent_word\", \"$parent_lang\")"; 
 		$result=dbquery($query)
@@ -103,6 +120,11 @@ function parse($line) {
 	//	echo "<p>Parent Word: $parent_word</p>"; 
 		// debug_print(". "); 
 		$word_numwords = count(split(" ",$word)); 
+
+		if($word_lang !== "eng") { //only English for now. 
+			return; 
+		} 
+
 		if($word_numwords==1) { //add only single words to database
 			$query="INSERT INTO derivations(word, word_lang,parent_word, parent_lang) VALUES (\"$word\",\"$word_lang\", \"$parent_word\", \"$parent_lang\")"; 
 			$result=dbquery($query)
@@ -112,7 +134,20 @@ function parse($line) {
 } 
 
 //open the etymological wordnet for parsing
+$handle = fopen("etymwn.tsv", 'r'); 
+if ($handle) {
+    while (($line = fgets($handle, 4096)) !== false ) {
+        parse($line);
+   }
+ if (!feof($handle)) {
+      echo "Error: unexpected fgets() fail\n";
+    }
+   fclose($handle);
+}
+
+
 $handle = fopen("etymwn-new.tsv", 'r'); 
+debug_print("Now parsing custom additions to the Etymological Wordnet."); 
 if ($handle) {
     while (($line = fgets($handle, 4096)) !== false ) {
         parse($line);
