@@ -16,6 +16,7 @@ function debug_print($text) {
 	flush(); 
 } 
 
+//got this function from http://stackoverflow.com/a/2814915/584121 
 function starts_with_upper($str) {
     $chr = mb_substr ($str, 0, 1, "UTF-8");
     return mb_strtolower($chr, "UTF-8") != $chr;
@@ -90,7 +91,7 @@ function parse($line) {
 		//echo "<p>Parent lang: $parent_lang</p>"; 
 		//echo "<p>Parent Word: $parent_word</p>"; 
 		
-		if($word_lang !== "eng"){ //only English words for now. 
+		if($word_lang !== "eng" && $word_lang !== "enm" ){ //only English words for now. 
 			return; 
 		} 
 
@@ -121,7 +122,7 @@ function parse($line) {
 		// debug_print(". "); 
 		$word_numwords = count(split(" ",$word)); 
 
-		if($word_lang !== "eng") { //only English for now. 
+		if($word_lang !== "eng" && $word_lang !== "enm") { //only English for now. 
 			return; 
 		} 
 
@@ -158,7 +159,14 @@ if ($handle) {
    fclose($handle);
 }
 
+$result=dbquery("CREATE INDEX word_index ON etym_dict (word)" )
+	or die("Failed to create index on etym_dict."); 
+
+$result=dbquery("CREATE INDEX word_index ON derivations (word)") 
+	or die("Failed to create index on derivations."); 
+
 debug_print("Closing database connection."); 
+
 dbclose($dbc); 
 
 ?> 
