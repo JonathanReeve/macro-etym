@@ -93,7 +93,12 @@ function parse($line) {
 		
 		if($word_lang !== "eng" && $word_lang !== "enm" ){ //only English words for now. 
 			return; 
+		}
+		
+		if($parent_word[0]=="-") { //don't parse parent words that begin with a hyphen, because they are probably parts of words like -tion, which aren't as useful for this purpose 
+			return; 
 		} 
+ 
 
 		if(starts_with_upper($word)) { //skip words that begin with uppercase, since they're probably names. 
 			//debug_print("Skipping word $word, since it's probably a name."); 
