@@ -98,13 +98,13 @@ function parse($line) {
 		if($parent_word[0]=="-") { //don't parse parent words that begin with a hyphen, because they are probably parts of words like -tion, which aren't as useful for this purpose 
 			return; 
 		} 
- 
 
 		if(starts_with_upper($word)) { //skip words that begin with uppercase, since they're probably names. 
 			//debug_print("Skipping word $word, since it's probably a name."); 
 			return; 
 		} 
 
+		debug_print("$word, "); 
 		$query="INSERT INTO etym_dict(word, word_lang,parent_word, parent_lang) VALUES (\"$word\",\"$word_lang\", \"$parent_word\", \"$parent_lang\")"; 
 		$result=dbquery($query)
 			or die ("There was a problem inserting stuff into the etymological dictionary database."); 
@@ -156,8 +156,8 @@ if ($handle) {
 }
 
 
-$handle = fopen("etymwn-new.tsv", 'r'); 
 debug_print("Now parsing custom additions to the Etymological Wordnet."); 
+$handle = fopen("etymwn-new.tsv", 'r'); 
 if ($handle) {
     while (($line = fgets($handle, 4096)) !== false ) {
         parse($line);
@@ -178,4 +178,5 @@ debug_print("Closing database connection.");
 
 dbclose($dbc); 
 
+debug_print("Successfully parsed dictionaries into database."); 
 ?> 

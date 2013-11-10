@@ -215,9 +215,10 @@ echo "<p>Looking up $unique_words words.</p>";
 
 <?php 
 foreach (array_keys($results) as $word) { 
+	if(substr($word, -2)=="'s") { 
+		$word = substr($word, 0, -2); //cut off 's from possessives
+	} 
 	$parent=lookup($word); 
-	//debug_print("Parent is: "); 
-	//print_r($parent);  
 	$parent_lang=$parent[0]; 
 	$parent_word=trim($parent[1]);  
 	if (!empty($parent_lang)) { //found it 
@@ -225,10 +226,7 @@ foreach (array_keys($results) as $word) {
 		debug_print("$word, "); 
 		if ($parent_lang == "enm") { 
 			$enm_words[]=$word; 
-			//debug_print("Looking up parent word: $parent_word ."); 
 			$grandparent = lookup($parent_word, $enm=TRUE); 
-			//echo "Grandparent is: "; 
-			//print_r($grandparent); 
 			$grandparent_lang = $grandparent[0]; 
 			if (!empty($grandparent_lang)) { 
 				$grandparent_langs[]=array($word,$grandparent_lang,$results[$word]);
