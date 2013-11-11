@@ -204,8 +204,12 @@ $not_in_dict=array();
 echo "<p>Looking up $unique_words words.</p>"; 
 ?>
 
-<div id="piechart" style="width: 100%; height: 400px;">
+<div id="piechart" class="piechart">
 </div>
+
+<div id="piechart2" class="piechart">
+</div>
+
 
 <div id="wordOutput" class="box">
 	<h2>Words</h2> 
@@ -393,7 +397,7 @@ foreach($grandparent_langs as $wordResult) {
 <?php 
 
 $lang_tree['Germanic'] = array('eng','enm','ang','goh','deu','gmh','gml','nld','non','dan','odt'); 
-$lang_tree['Latinate'] =  array('fra','frm','fro','xno','ita','lat'); 
+$lang_tree['Latinate'] =  array('fra','frm','fro','xno','ita','lat','spa','por'); 
 $lang_tree['Slavic'] = array('ces'); 
 $lang_tree['Celtic'] = array('sga'); 
 $lang_tree['Afroasiatic'] = array('ara'); 
@@ -512,19 +516,6 @@ foreach($gp_families as $family => $count) {
 </div><!--end .boxContent --> 
 </div><!--end .box --> 
 
-<?php if ($enm_words == "disabling this. make it !==NULL to reenable it"): ?> 
-<div id="me_words" class="box">
-<h2>Middle English Words</h2>
-<div class="boxContent">
-<p class="caption">Here are the Middle English Words: </p> 
-<?php foreach ($enm_words as $enm_word) { 
-	echo "$enm_word, "; 
-} ?> 
-</p>
-</div><!--end .boxContent--> 
-</div><!--end of .box--> 
-<?php endif; ?> 
-
 <div id="log" class="box">
 <h2>Logging</h2>
 <div class="boxContent">
@@ -534,7 +525,7 @@ foreach($gp_families as $family => $count) {
 $logfile = 'log.txt'; 
 //echo "Families: "; 
 //print_r($families); 
-$log_content = join(',', array($test_filename, $families["Germanic"][1],$families["Latinate"][1],$families["Hellenic"][1],$families["Unknown"][1])) . "\n"; //only using these families for now
+$log_content = join(',', array($test_filename, $families["Germanic"][1],$gp_families["Germanic"][1],$families["Latinate"][1],$gp_families["Latinate"][1],$families["Hellenic"][1],$families["Unknown"][1])) . "\n"; //only using these families for now
 
 // Let's make sure the file exists and is writable first.
 if (is_writable($logfile)) {
@@ -585,6 +576,27 @@ if (is_writable($logfile)) {
       }
     </script>
   
+    <script type="text/javascript">
+      google.load("visualization", "1", {packages:["corechart"]});
+      google.setOnLoadCallback(drawChart);
+      function drawChart() {
+        var data = google.visualization.arrayToDataTable([
+		['Family', 'Count'],
+<?php foreach ($gp_families as $family => $count) { 
+	$count = $count[0]; 
+	echo "['$family', $count],"; 
+} ?> 
+	]); 
+
+        var options = {
+          title: 'Second Generation Parent Language Families',
+          is3D: true,
+        };
+
+        var chart = new google.visualization.PieChart(document.getElementById('piechart2'));
+        chart.draw(data, options);
+      }
+    </script>
 
 <?php endif; ?> 
 
