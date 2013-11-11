@@ -471,9 +471,9 @@ foreach($gp_lang_count as $lang => $count) { //loop through the raw languages li
 } 
 
 $gp_families['Unknown']=count($not_in_dict)+count($not_in_dict_2g); 
-$gp_families_total = array_sum(array_values($families)); 
+$gp_families_total = array_sum(array_values($gp_families)); 
 foreach($gp_families as $family => $count) { 
-	$gp_family_percentage = round(($count / $families_total * 100), 2);  
+	$gp_family_percentage = round(($count / $gp_families_total * 100), 2);  
 	$gp_families[$family] = array($count, $gp_family_percentage); 
 } 
 
