@@ -156,8 +156,11 @@ if ($handle) {
 }
 
 //corrections
-$result=dbquery("DELETE FROM etym_dict WHERE word IN ('as', 'bath')")
+$result=dbquery("DELETE FROM etym_dict WHERE word IN ('as', 'bath', 'dan')")
 	or die("Couldnt delete something."); 
+//as is not Latin
+//bath is not Hebrew
+//dan is not Japanese
 
 $result=dbquery("DELETE FROM etym_dict WHERE word="tell" and parent_lang="ara")
 	or die("Couldnt delete something."); 
