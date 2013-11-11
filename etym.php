@@ -524,7 +524,14 @@ foreach($gp_families as $family => $count) {
 $logfile = 'log.txt'; 
 //echo "Families: "; 
 //print_r($families); 
-$log_content = join(',', array($test_filename, $families["Germanic"][1],$gp_families["Germanic"][1],$families["Latinate"][1],$gp_families["Latinate"][1],$families["Hellenic"][1],$families["Unknown"][1])) . "\n"; //only using these families for now
+if (substr($test_filename, 0, 3)=="txt") { //clean up filenames for test files
+	$trimmed_filename = substr($test_filename, 4);  
+	$trimmed_filename = substr($trimmed_filename, 0, -4);  
+} else { 
+       $trimmed_filename = $test_filename; 
+} 
+$vocab_quotient = round((($unique_words / $num_words) * 100),2); 
+$log_content = join(',', array($trimmed_filename,$num_words,$unique_words,$vocab_quotient,$families["Germanic"][1],$gp_families["Germanic"][1],$families["Latinate"][1],$gp_families["Latinate"][1],$families["Hellenic"][1],$families["Unknown"][1],$gp_families["Unknown"][1])) . "\n"; //only using these families for now
 
 // Let's make sure the file exists and is writable first.
 if (is_writable($logfile)) {
