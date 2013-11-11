@@ -155,6 +155,12 @@ if ($handle) {
    fclose($handle);
 }
 
+//corrections
+$result=dbquery("DELETE FROM etym_dict WHERE word IN ('as', 'bath')")
+	or die("Couldnt delete something."); 
+
+$result=dbquery("DELETE FROM etym_dict WHERE word="tell" and parent_lang="ara")
+	or die("Couldnt delete something."); 
 
 debug_print("Now parsing custom additions to the Etymological Wordnet."); 
 $handle = fopen("etymwn-new.tsv", 'r'); 
@@ -167,6 +173,7 @@ if ($handle) {
     }
    fclose($handle);
 }
+
 
 $result=dbquery("CREATE INDEX word_index ON etym_dict (word)" )
 	or die("Failed to create index on etym_dict."); 
