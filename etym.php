@@ -228,8 +228,7 @@ foreach (array_keys($results) as $word) {
 	if (!empty($parent_lang)) { //found it 
 		$parent_langs[]=array($word,$parent_lang,$results[$word]); 
 		debug_print("$word, "); 
-		if ($parent_lang == "enm") { 
-			$enm_words[]=$word; 
+		if ($parent_lang == "enm" || $parent_lang == "eng") { 
 			$grandparent = lookup($parent_word, $enm=TRUE); 
 			$grandparent_lang = $grandparent[0]; 
 			if (!empty($grandparent_lang)) { 
@@ -398,9 +397,9 @@ foreach($grandparent_langs as $wordResult) {
 
 $lang_tree['Germanic'] = array('eng','enm','ang','goh','deu','gmh','gml','nld','non','dan','odt'); 
 $lang_tree['Latinate'] =  array('fra','frm','fro','xno','ita','lat','spa','por'); 
-$lang_tree['Slavic'] = array('ces'); 
-$lang_tree['Celtic'] = array('sga'); 
-$lang_tree['Afroasiatic'] = array('ara'); 
+$lang_tree['Slavic'] = array('ces','heb'); 
+$lang_tree['Celtic'] = array('sga','gle'); 
+$lang_tree['Afroasiatic'] = array('ara','arz'); 
 $lang_tree['Iranian'] = array('fas'); 
 $lang_tree['Hellenic'] = array('grc'); 
 $lang_tree['Other'] = array('nan'); 
@@ -471,7 +470,7 @@ foreach($gp_lang_count as $lang => $count) { //loop through the raw languages li
 		</tr>"; 
 } 
 
-$gp_families['Unknown']=count($not_in_dict); 
+$gp_families['Unknown']=count($not_in_dict)+count($not_in_dict_2g); 
 $gp_families_total = array_sum(array_values($families)); 
 foreach($gp_families as $family => $count) { 
 	$gp_family_percentage = round(($count / $families_total * 100), 2);  
