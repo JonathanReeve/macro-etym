@@ -268,7 +268,10 @@ class Text():
         if pretty:
             prettyStats = {}
             for lang, perc in stats.items(): 
-                prettyLang = languages.get(iso639_3_code=lang).name
+                if lang == 'unk': 
+                    prettyLang = 'Unknown'
+                else: 
+                    prettyLang = languages.get(iso639_3_code=lang).name
                 prettyStats[prettyLang] = round(perc, 2) # rename the key
             return prettyStats
         else: 
