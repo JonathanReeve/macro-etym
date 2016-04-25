@@ -322,6 +322,11 @@ class Text():
         df = pd.DataFrame(d)
         print(df)
 
+    def printCSVStats(self, filename): 
+        d = {filename: self.prettyStats}
+        df = pd.DataFrame(d)
+        print(df.to_csv())
+
 @click.command()
 @click.argument('filenames', nargs=-1, required=True)
 @click.option('--allstats', is_flag=True, 
@@ -348,6 +353,7 @@ def cli(filenames, allstats, lang, showfamilies, affixes, current, csv, chart, v
     ignoreAffixes = not affixes
     ignoreCurrent = not current
     cumulativeStats = {}
+    cumulativeAllStats = {}
 
     if verbose: 
         logging.basicConfig(level=logging.DEBUG)
@@ -357,7 +363,10 @@ def cli(filenames, allstats, lang, showfamilies, affixes, current, csv, chart, v
             text = fdata.read()
 
         t = Text(text, lang, ignoreAffixes, ignoreCurrent)
-        if allstats: 
+
+        if single and allstats and csv: 
+            t.printCSVStats(filename)
+        elif single and allstats: 
             t.printPrettyStats(filename)
         
         if chart and single: 
@@ -372,18 +381,28 @@ def cli(filenames, allstats, lang, showfamilies, affixes, current, csv, chart, v
             print('Chart saved as chart.png.')
 
         cumulativeStats[filename] = t.familyStats(pad=single)
+        cumulativeAllStats[filename] = t.prettyStats
 
     df = pd.DataFrame(cumulativeStats)
     df = df.fillna(0)
+
+    dfAll = pd.DataFrame(cumulativeAllStats)
+    dfAll = dfAll.fillna(0)
 
     if showfamilies: 
         famlist = showfamilies.split(',')
         df = df.loc[famlist]
 
-    if csv: 
-        print(df.to_csv())
+    if not allstats: 
+        if csv: 
+            print(df.to_csv())
+        else: 
+            print(df)
     else: 
-        print(df)
+        if csv: 
+            print(dfAll.to_csv())
+        else: 
+            print(dfAll)
 
     if chart and not single: 
         ax = df.plot(kind='bar', figsize=(6,6))
