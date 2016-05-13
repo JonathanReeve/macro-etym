@@ -1,23 +1,25 @@
 import csv                                 # to parse the Etymological Wordnet CSV file
 from collections import Counter            # to count things
 from nltk import word_tokenize             # for breaking texts into words
+from nltk.tokenize import RegexpTokenizer # for span tokenizing
 from nltk.tag import pos_tag               # for detecting parts of speech
 from nltk.stem import WordNetLemmatizer    # for getting dictionary forms of words
 from string import punctuation             # for cleaning texts
 from pycountry import languages            # to look up ISO language codes
 from nltk.corpus import stopwords          # to remove unnecessary words
-from nltk.corpus import wordnet            
+from nltk.corpus import wordnet
 import pandas as pd                        # for pretty charts
 import matplotlib                          # also for pretty charts
 #matplotlib.style.use('ggplot')             # make the charts look nicer
 import click                               # make it a command-line program
 import codecs
 import logging                             # to log messages
+from pkg_resources import resource_filename
 
 """
 
 I made the file below, etymwn-smaller.tsv, by running these unix commands
-on the Etymological Wordnet: 
+on the Etymological Wordnet:
 
 First, get only those entries with the relation "rel:etymology":
     grep "rel:etymology" etymwn.tsv > etymwn-small.tsv
@@ -26,153 +28,154 @@ Now we can remove the relation column, since it's all "rel:etymology":
 
 """
 
-# Parse the CSV file. 
+# Parse the CSV file.
 etymdict = {}
-with open('etymwn-smaller.tsv') as csvfile:
+etymwn = resource_filename(__name__, 'etymwn-smaller.tsv')
+with open(etymwn) as csvfile:
     csvreader = csv.reader(csvfile, delimiter='\t')
     for line in csvreader:
-        if line[0] in etymdict: 
+        if line[0] in etymdict:
             etymdict[line[0]].append(line[1])
-        else: 
+        else:
             etymdict[line[0]] = [line[1]]
 
 class LangList():
     """
-    A class for language lists, that helps to count languages. 
+    A class for language lists, that helps to count languages.
     """
-    def __init__(self, langs): 
+    def __init__(self, langs):
         self.langs = langs
-            
-    def __repr__(self): 
+
+    def __repr__(self):
         return str(self.langs)
-    
+
     @property
-    def stats(self): 
+    def stats(self):
         """ Generates statistics about languages present in the list. """
         counter = Counter(self.langs)
         stats = {}
-        for lang in counter.keys(): 
-            stats[lang] = (counter[lang] / len(self.langs))*100 
+        for lang in counter.keys():
+            stats[lang] = (counter[lang] / len(self.langs))*100
         return stats
 
-class Word(): 
+class Word():
     """
     A word object, for looking up etymologies of single words.
     """
-    def __init__(self, word, lang='eng', ignoreAffixes=True, ignoreCurrent=True): 
+    def __init__(self, word, lang='eng', ignoreAffixes=True, ignoreCurrent=True):
         self.lang = lang
         self.word = word
         self.ignoreAffixes = ignoreAffixes
         self.ignoreCurrent = ignoreCurrent
-        
-    def __repr__(self): 
+
+    def __repr__(self):
         return '%s (%s)' % (self.word, self.lang)
-    
-    def __str__(self): 
+
+    def __str__(self):
         return self.word
-        
-    def oldVersions(self, language): 
+
+    def oldVersions(self, language):
         """
-        Returns a list of older versions of a language, such that given "eng" 
-        (Modern English) it will return "enm" (Middle English). This is used 
-        for filtering out current languages in the ignoreCurrent option of 
-        parents() below. 
+        Returns a list of older versions of a language, such that given "eng"
+        (Modern English) it will return "enm" (Middle English). This is used
+        for filtering out current languages in the ignoreCurrent option of
+        parents() below.
         """
-        if language == 'eng': 
+        if language == 'eng':
             return ['enm']
-        if language == 'fra': 
+        if language == 'fra':
             return ['frm', 'xno'] # Middle French
         if language == 'dut':
             return ['dum'] # Middle Dutch
         if language == 'gle': # Irish
-            return ['mga'] # Middle Irish 
-        # TODO: add other languages here. 
-        else: 
+            return ['mga'] # Middle Irish
+        # TODO: add other languages here.
+        else:
             return []
-        
+
     @property
     def parents(self):
-        """ 
-        The main etymological lookup method. 
+        """
+        The main etymological lookup method.
 
         ignoreAffixes will remove suffixes like -ly, so that the parent list
-        for "universally" returns "universal (eng)" instead of "universal 
-        (eng), -ly (eng)." 
-        
-        ignoreCurrent will ignore etymologies in the current language and 
-        slightly older versions of that language, so that it skips "universal 
-        (eng)," and goes straight to the good stuff, i.e. "universalis (lat)." 
-        Given a word in English, it will skip all other English and Middle 
-        English ancestors, but won't skip Old English. 
+        for "universally" returns "universal (eng)" instead of "universal
+        (eng), -ly (eng)."
+
+        ignoreCurrent will ignore etymologies in the current language and
+        slightly older versions of that language, so that it skips "universal
+        (eng)," and goes straight to the good stuff, i.e. "universalis (lat)."
+        Given a word in English, it will skip all other English and Middle
+        English ancestors, but won't skip Old English.
         """
         ignoreAffixes = self.ignoreAffixes
         ignoreCurrent = self.ignoreCurrent
         word = self.word
         language = self.lang
-        
-        # Finds the first-generation ancestor(s) of a word. 
-        try: 
+
+        # Finds the first-generation ancestor(s) of a word.
+        try:
             rawParentList = etymdict[language + ": " + word]
-        except: 
+        except:
             rawParentList = []
-        parentList = [self.split(parent) for parent in rawParentList] 
-        if ignoreAffixes: 
+        parentList = [self.split(parent) for parent in rawParentList]
+        if ignoreAffixes:
             parentList = [p for p in parentList if p.word[0] is not '-']
             parentList = [p for p in parentList if p.word[-1] is not '-']
-        if ignoreCurrent: 
-            newParents = [] 
-            for parent in parentList: 
-                if parent.lang == language or parent.lang in self.oldVersions(language): 
-                    for otherParent in parent.parents: # Go deeper. 
+        if ignoreCurrent:
+            newParents = []
+            for parent in parentList:
+                if parent.lang == language or parent.lang in self.oldVersions(language):
+                    for otherParent in parent.parents: # Go deeper.
                         newParents.append(otherParent)
-                else: 
+                else:
                     newParents.append(parent)
             parentList = newParents
         return parentList
-        
+
     @property
     def parentLanguages(self):
         parentLangs = []
-        for parent in self.parents: 
+        for parent in self.parents:
             parentLangs.append(parent.lang)
         return LangList(parentLangs)
-    
+
     @property
-    def grandparents(self): 
+    def grandparents(self):
         return [Word(parent.word, lang=parent.lang).parents for parent in self.parents]
-    
+
     @property
     def grandparentLanguages(self):
         grandparentLangs = []
-        for grandparentList in self.grandparents: 
-            for grandparent in grandparentList: 
+        for grandparentList in self.grandparents:
+            for grandparent in grandparentList:
                 grandparentLangs.append(grandparent.lang)
         return LangList(grandparentLangs)
-    
-    def split(self, expression): 
-        """ Takes and expression in the form 'enm: not' and returns 
-        a Word object where word.lang is 'enm' and word.word is 'not'. 
+
+    def split(self, expression):
+        """ Takes and expression in the form 'enm: not' and returns
+        a Word object where word.lang is 'enm' and word.word is 'not'.
         """
         parts = expression.split(':')
         return Word(parts[1].strip(), parts[0])
 
 class Text():
-    def __init__(self, text, lang='eng', ignoreAffixes=True, ignoreCurrent=True): 
+    def __init__(self, text, lang='eng', ignoreAffixes=True, ignoreCurrent=True):
         self.text = text
         self.lang = lang
-        self.ignoreAffixes = ignoreAffixes 
+        self.ignoreAffixes = ignoreAffixes
         self.ignoreCurrent = ignoreCurrent
         logging.debug('Initializing text with lang %s' % lang)
-        if ignoreAffixes: 
+        if ignoreAffixes:
             logging.debug('Ignoring affixes.')
-        if ignoreCurrent: 
+        if ignoreCurrent:
             logging.debug('Ignoring current language and its middle variants.')
-    
-    langDict = {'Germanic': ['eng', 'enm', 'ang', 'deu', 'dut', 'nld', 'dum', 
+
+    langDict = {'Germanic': ['eng', 'enm', 'ang', 'deu', 'dut', 'nld', 'dum',
                             'non', 'gml', 'yid', 'swe', 'rme', 'sco', 'isl',
                             'dan'],
-                'Latinate': ['fra', 'frm', 'fro', 'lat', 'spa', 'xno', 'por', 
-                            'ita'], 
+                'Latinate': ['fra', 'frm', 'fro', 'lat', 'spa', 'xno', 'por',
+                            'ita'],
                 'Indo-Iranian': ['hin', 'fas'],
                 'Celtic': ['gle', 'gla'],
                 'Hellenic': ['grc'],
@@ -182,55 +185,62 @@ class Text():
                 'Balto-Slavic': ['rus'],
                 'Uralic': ['fin', 'hun'],
                 'Japonic': ['jpn']}
-    
+
     @property
-    def tokens(self): 
+    def tokens(self):
         return word_tokenize(self.text)
-        
+
+    # @property
+    # def tokens(self):
+    #     tokenizer = RegexpTokenizer("\b\w+['-]?\b")
+    #     tokenizer = RegexpTokenizer(r"\b\w+['-]?\w+?\b")
+    #     self.spans = tokenizer.word_tokenize(self.text)
+    #     return tokenizer.tokenize(self.text)
+
     @property
-    def cleanTokens(self, removeStopwords=True): 
+    def cleanTokens(self, removeStopwords=True):
         clean = [token for token in self.tokens if token not in punctuation]
         clean = [token.lower() for token in clean]
         clean = [token for token in clean if token.isalpha()]
         if removeStopwords:
             clean = self.removeStopwords(clean)
         return clean
-    
-    def removeStopwords(self, tokens): 
+
+    def removeStopwords(self, tokens):
         availableStopwords = "danish english french hungarian norwegian"\
         "spanish turkish dutch finnish german italian portuguese russian"\
         "swedish".split()
         stopDict = {lang[:3]: lang for lang in availableStopwords}
         stopDict['fra'] = 'french' # Exception
         stopDict['deu'] = 'german' # Another exception
-        if self.lang in stopDict: 
+        if self.lang in stopDict:
             stops = stopwords.words(stopDict[self.lang])
             return [token for token in tokens if token not in stops]
-        else: 
+        else:
             return tokens
 
     @property
-    def types(self): 
+    def types(self):
         return set(self.cleanTokens)
-    
+
     @property
     def posTags(self):
         return pos_tag(self.types)
-    
+
     @property
-    def lemmas(self): 
-        # Don't try to lemmatize non-English texts. 
-        if self.lang != 'eng': 
+    def lemmas(self):
+        # Don't try to lemmatize non-English texts.
+        if self.lang != 'eng':
             return self.types
         wordnetLemmatizer = WordNetLemmatizer()
         lemmas = []
         for word, pos in self.posTags:
             pos = self.get_wordnet_pos(pos)
-            if pos == '': 
+            if pos == '':
                 pos = 'n'
             lemmas.append(wordnetLemmatizer.lemmatize(word, pos))
         return lemmas
-    
+
     def get_wordnet_pos(self, treebank_tag):
         if treebank_tag.startswith('J'):
             return wordnet.ADJ
@@ -242,94 +252,99 @@ class Text():
             return wordnet.ADV
         else:
             return ''
-        
+
     @property
-    def wordObjects(self): 
+    def wordObjects(self):
         return [Word(token, self.lang, ignoreAffixes=self.ignoreAffixes, ignoreCurrent=self.ignoreCurrent) for token in self.lemmas]
-    
-    def showMacroEtym(self): 
-        for word in self.wordObjects: 
+
+    def annotate(self):
+        """ Returns an annotated text in HTML format. """
+        html = ""
+        return html
+
+    def showMacroEtym(self):
+        for word in self.wordObjects:
             print(word, word.parents)
-    
-    def getStats(self, pretty=False): 
+
+    def getStats(self, pretty=False):
         statsList = [word.parentLanguages.stats for word in self.wordObjects]
         stats = {}
-        for item in statsList: 
-            if len(item) > 0: 
-                for lang, perc in item.items(): 
-                    if lang not in stats: 
+        for item in statsList:
+            if len(item) > 0:
+                for lang, perc in item.items():
+                    if lang not in stats:
                         stats[lang] = perc
-                    else: 
+                    else:
                         stats[lang] += perc
         allPercs = sum(stats.values())
-        for lang, perc in stats.items(): 
+        for lang, perc in stats.items():
             stats[lang] = ( perc / allPercs ) * 100
-        
+
         if pretty:
             prettyStats = {}
-            for lang, perc in stats.items(): 
+            for lang, perc in stats.items():
                 prettyLang = languages.get(iso639_3_code=lang).name
                 prettyStats[prettyLang] = round(perc, 2) # rename the key
             return prettyStats
-        else: 
+        else:
             return stats
 
-    def getFamily(self, language): 
-        for family, children in self.langDict.items(): 
-            if language in children: 
+    def getFamily(self, language):
+        for family, children in self.langDict.items():
+            if language in children:
                 return family
         return 'Other'
-    
-    def getFamilyStats(self): 
+
+    def getFamilyStats(self):
         stats = self.getStats()
         families = {}
-        for lang, perc in stats.items(): 
+        for lang, perc in stats.items():
             fam = self.getFamily(lang)
             #print( fam, lang, perc) #debugging
-            if fam in families: 
+            if fam in families:
                 families[fam].append((lang, perc))
-            else: 
+            else:
                 families[fam] = [(lang, perc)]
         return families
-    
-    def compileFamilyStats(self, pad=True): 
+
+    def compileFamilyStats(self, pad=True):
         families = self.getFamilyStats()
         totals = {}
-        for family, langs in families.items(): 
+        for family, langs in families.items():
             totals[family] = 0
-            for lang in langs: 
+            for lang in langs:
                 totals[family] += lang[1]
         # optionally add language families not represented by the text
-        if pad: 
-            for fam in self.langDict: 
-                if fam not in totals: 
+        if pad:
+            for fam in self.langDict:
+                if fam not in totals:
                     totals[fam] = 0.0
         return totals
-    
+
     @property
-    def stats(self): 
+    def stats(self):
         return self.getStats()
-    
-    def familyStats(self, pad=True): 
+
+    def familyStats(self, pad=True):
         return self.compileFamilyStats(pad)
 
     @property
-    def prettyStats(self): 
+    def prettyStats(self):
         return self.getStats(pretty=True)
-    
-    def printPrettyStats(self, filename): 
+
+    def printPrettyStats(self, filename):
         d = {filename: self.prettyStats}
         df = pd.DataFrame(d)
         print(df)
 
-    def printCSVStats(self, filename): 
+    def printCSVStats(self, filename):
         d = {filename: self.prettyStats}
         df = pd.DataFrame(d)
         print(df.to_csv())
 
 @click.command()
 @click.argument('filenames', nargs=-1, required=True)
-@click.option('--allstats', is_flag=True, 
+@click.option('--allstats', is_flag=True,
         help="Get all etymological statistics about the file(s).")
 @click.option('--lang', default='eng',
         help="Specify the language of the texts. Use ISO639-3 "\
@@ -347,31 +362,31 @@ class Text():
 @click.option('--verbose', is_flag=True, help="Show debugging messages.")
 def cli(filenames, allstats, lang, showfamilies, affixes, current, csv, chart, verbose):
     """
-    Analyzes a text(s) for the etymologies of its words, and tallies the words by origin language, and origin language family.  
+    Analyzes a text(s) for the etymologies of its words, and tallies the words by origin language, and origin language family.
     """
-    single = len(filenames) == 1 
+    single = len(filenames) == 1
     ignoreAffixes = not affixes
     ignoreCurrent = not current
     cumulativeStats = {}
     cumulativeAllStats = {}
 
-    if verbose: 
+    if verbose:
         logging.basicConfig(level=logging.DEBUG)
 
-    for filename in filenames: 
+    for filename in filenames:
         with codecs.open(filename, "r",encoding='utf-8', errors='ignore') as fdata:
             text = fdata.read()
 
         t = Text(text, lang, ignoreAffixes, ignoreCurrent)
 
-        if single and allstats and csv: 
+        if single and allstats and csv:
             t.printCSVStats(filename)
-        elif single and allstats: 
+        elif single and allstats:
             t.printPrettyStats(filename)
-        
-        if chart and single: 
+
+        if chart and single:
             s = pd.Series(t.familyStats())
-            if showfamilies: 
+            if showfamilies:
                 famlist = showfamilies.split(',')
                 s = s.loc[famlist]
             ax = s.plot(kind='pie', figsize=(6,6))
@@ -389,22 +404,22 @@ def cli(filenames, allstats, lang, showfamilies, affixes, current, csv, chart, v
     dfAll = pd.DataFrame(cumulativeAllStats)
     dfAll = dfAll.fillna(0)
 
-    if showfamilies: 
+    if showfamilies:
         famlist = showfamilies.split(',')
         df = df.loc[famlist]
 
-    if not allstats: 
-        if csv: 
+    if not allstats:
+        if csv:
             print(df.to_csv())
-        else: 
+        else:
             print(df)
-    else: 
-        if csv: 
+    else:
+        if csv:
             print(dfAll.to_csv())
-        else: 
+        else:
             print(dfAll)
 
-    if chart and not single: 
+    if chart and not single:
         ax = df.plot(kind='bar', figsize=(6,6))
         fig = ax.get_figure()
         fig.tight_layout()
