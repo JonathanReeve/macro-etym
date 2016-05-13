@@ -6,13 +6,14 @@ setup(
   description = 'A tool for macro-etymological textual analysis.',
   author = 'Jonathan Reeve',
   author_email = 'jon.reeve@gmail.com',
-  url = 'https://github.com/JonathanReeve/macro-etym', # use the URL to the github repo
-  download_url = 'https://github.com/peterldowns/mypackage/tarball/0.1', # I'll explain this in a second
+  url = 'https://github.com/JonathanReeve/macro-etym', 
+  
+  download_url = 'https://github.com/JonathanReeve/macro-etym/tarball/0.1', # FIXME: make a git tag and confirm that this link works
   install_requires = ['Click', 'nltk', 'pycountry', 'pandas',
                       'matplotlib'],
   include_package_data = True,
   package_data = {'macroetym': ['etymwm-smaller.tsv']}, 
-  keywords = ['nlp', 'text-analysis', 'etymology'], # arbitrary keywords
+  keywords = ['nlp', 'text-analysis', 'etymology'], 
   classifiers = [],
   entry_points='''
       [console_scripts]
