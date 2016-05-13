@@ -125,7 +125,8 @@ class Word():
         if ignoreCurrent:
             newParents = []
             for parent in parentList:
-                if parent.lang == language or parent.lang in self.oldVersions(language):
+                if parent.lang == language or parent.lang
+                in self.oldVersions(language):
                     for otherParent in parent.parents: # Go deeper.
                         newParents.append(otherParent)
                 else:
@@ -142,7 +143,8 @@ class Word():
 
     @property
     def grandparents(self):
-        return [Word(parent.word, lang=parent.lang).parents for parent in self.parents]
+        return [Word(parent.word, lang=parent.lang).parents
+        for parent in self.parents]
 
     @property
     def grandparentLanguages(self):
@@ -255,7 +257,8 @@ class Text():
 
     @property
     def wordObjects(self):
-        return [Word(token, self.lang, ignoreAffixes=self.ignoreAffixes, ignoreCurrent=self.ignoreCurrent) for token in self.lemmas]
+        return [Word(token, self.lang, ignoreAffixes=self.ignoreAffixes,
+        ignoreCurrent=self.ignoreCurrent) for token in self.lemmas]
 
     def annotate(self):
         """ Returns an annotated text in HTML format. """
@@ -351,18 +354,20 @@ class Text():
              "three-letter language code. Default is English.")
 @click.option('--showfamilies', help="A comma-separated list of language "\
               "families to show, e.g. Latinate,Germanic")
-@click.option('--affixes', is_flag=True, help="Don't ignore affixes."\
+@click.option('--affixes', is_flag=True, help="Don't ignore affixes. "\
               "Default is to ignore them.")
-@click.option('--current', is_flag=True, help="Don't ignore current language"\
+@click.option('--current', is_flag=True, help="Don't ignore current language "\
               "and its middle variants. Default is to ignore them.")
-@click.option('-c', '--csv', is_flag=True, help="Print a machine-readable"
+@click.option('-c', '--csv', is_flag=True, help="Print a machine-readable "
               "CSV instead of a pretty table.")
-@click.option('--chart', is_flag=True, help="Make a pretty graph of the"\
+@click.option('--chart', is_flag=True, help="Make a pretty graph of the "\
               "results. For one text, a pie; for multiple, a bar.")
 @click.option('--verbose', is_flag=True, help="Show debugging messages.")
-def cli(filenames, allstats, lang, showfamilies, affixes, current, csv, chart, verbose):
+def cli(filenames, allstats, lang, showfamilies, affixes,
+        current, csv, chart, verbose):
     """
-    Analyzes a text(s) for the etymologies of its words, and tallies the words by origin language, and origin language family.
+    Analyzes a text(s) for the etymologies of its words, and tallies the words
+    by origin language, and origin language family.
     """
     single = len(filenames) == 1
     ignoreAffixes = not affixes
