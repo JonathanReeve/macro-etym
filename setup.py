@@ -10,6 +10,8 @@ setup(
   download_url = 'https://github.com/peterldowns/mypackage/tarball/0.1', # I'll explain this in a second
   install_requires = ['Click', 'nltk', 'pycountry', 'pandas',
                       'matplotlib'],
+  include_package_data = True,
+  package_data = {'macroetym': ['etymwm-smaller.tsv']}, 
   keywords = ['nlp', 'text-analysis', 'etymology'], # arbitrary keywords
   classifiers = [],
   entry_points='''
