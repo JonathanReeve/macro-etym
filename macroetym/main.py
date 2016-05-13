@@ -125,8 +125,7 @@ class Word():
         if ignoreCurrent:
             newParents = []
             for parent in parentList:
-                if parent.lang == language or parent.lang
-                in self.oldVersions(language):
+                if parent.lang == language or parent.lang in self.oldVersions(language):
                     for otherParent in parent.parents: # Go deeper.
                         newParents.append(otherParent)
                 else:

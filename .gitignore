@@ -1,0 +1,6 @@
+.ipynb_checkpoints/
+__pycache__/
+chart.png
+etymwn/
+macroetym.egg-info/
+texts/
