@@ -126,6 +126,7 @@ class Word():
             newParents = []
             for parent in parentList:
                 if parent.lang == language or parent.lang in self.oldVersions(language):
+                    logging.debug('Searching deeper for word %s with lang %s' % (parent.word, parent.lang))
                     for otherParent in parent.parents: # Go deeper.
                         newParents.append(otherParent)
                 else:
