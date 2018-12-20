@@ -15,7 +15,9 @@ You can install this program with git and pip:
     cd macro-etym
     pip install .
 
-If you experience errors, you could try installing with `pip3` instead.
+If you experience errors, you could try installing with `pip3` instead:
+
+    pip3 install .
 
 ## Usage
 
