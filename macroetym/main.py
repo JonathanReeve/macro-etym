@@ -15,6 +15,7 @@ import click                               # make it a command-line program
 import codecs
 import logging                             # to log messages
 from pkg_resources import resource_filename
+from inspect import getouterframes, currentframes # check recursion depth
 
 """
 
@@ -67,7 +68,6 @@ class Word():
         self.word = word
         self.ignoreAffixes = ignoreAffixes
         self.ignoreCurrent = ignoreCurrent
-        self.recursionDepth = 0
 
     def __repr__(self):
         return '%s (%s)' % (self.word, self.lang)
@@ -126,7 +126,9 @@ class Word():
         if ignoreCurrent:
             newParents = []
             for parent in parentList:
-                if (parent.lang == language or parent.lang in self.oldVersions(language)) and parent.recursionDepth < 3:
+                # Magic for detecting recursion level
+                level = len(getouterframes(currentframe(1)))
+                if (parent.lang == language or parent.lang in self.oldVersions(language)) and level < 3:
                     logging.debug('Searching deeper for word %s with lang %s and recursionDepth %s' % (parent.word, parent.lang, parent.recursionDepth))
                     parent.recursionDepth += 1
                     for otherParent in parent.parents: # Go deeper.
