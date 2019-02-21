@@ -15,7 +15,6 @@ import click                               # make it a command-line program
 import codecs
 import logging                             # to log messages
 from pkg_resources import resource_filename
-from inspect import getouterframes, currentframe # check recursion depth
 
 """
 
@@ -96,6 +95,9 @@ class Word():
 
     @property
     def parents(self):
+        return self.getParents()
+
+    def getParents(self, l=0):
         """
         The main etymological lookup method.
 
@@ -109,29 +111,23 @@ class Word():
         Given a word in English, it will skip all other English and Middle
         English ancestors, but won't skip Old English.
         """
-        ignoreAffixes = self.ignoreAffixes
-        ignoreCurrent = self.ignoreCurrent
-        word = self.word
         language = self.lang
 
         # Finds the first-generation ancestor(s) of a word.
         try:
-            rawParentList = etymdict[language + ": " + word]
+            rawParentList = etymdict[language + ": " + self.word]
         except:
             rawParentList = []
         parentList = [self.split(parent) for parent in rawParentList]
-        if ignoreAffixes:
+        if self.ignoreAffixes:
             parentList = [p for p in parentList if p.word[0] is not '-']
             parentList = [p for p in parentList if p.word[-1] is not '-']
-        if ignoreCurrent:
+        if self.ignoreCurrent:
             newParents = []
             for parent in parentList:
-                # Magic for detecting recursion level
-                level = len(getouterframes(currentframe(1)))
-                if (parent.lang == language or parent.lang in self.oldVersions(language)) and level < 3:
-                    logging.debug('Searching deeper for word %s with lang %s and recursionDepth %s' % (parent.word, parent.lang, parent.recursionDepth))
-                    parent.recursionDepth += 1
-                    for otherParent in parent.parents: # Go deeper.
+                if (parent.lang == language or parent.lang in self.oldVersions(language)) and l<3:
+                    logging.debug('Searching deeper for word %s with lang %s' % (parent.word, parent.lang))
+                    for otherParent in parent.getParents(l=l+1): # Go deeper.
                         newParents.append(otherParent)
                 else:
                     newParents.append(parent)
