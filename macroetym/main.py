@@ -15,7 +15,7 @@ import click                               # make it a command-line program
 import codecs
 import logging                             # to log messages
 from pkg_resources import resource_filename
-from inspect import getouterframes, currentframes # check recursion depth
+from inspect import getouterframes, currentframe # check recursion depth
 
 """
 
