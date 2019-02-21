@@ -67,6 +67,7 @@ class Word():
         self.word = word
         self.ignoreAffixes = ignoreAffixes
         self.ignoreCurrent = ignoreCurrent
+        self.recursionLevel = 0
 
     def __repr__(self):
         return '%s (%s)' % (self.word, self.lang)
@@ -94,7 +95,7 @@ class Word():
             return []
 
     @property
-    def parents(self):
+    def parents(self, level=0):
         """
         The main etymological lookup method.
 
@@ -122,14 +123,11 @@ class Word():
         if ignoreAffixes:
             parentList = [p for p in parentList if p.word[0] is not '-']
             parentList = [p for p in parentList if p.word[-1] is not '-']
-        if ignoreCurrent:
+        if ignoreCurrent and level > 3:
             newParents = []
-            recursionDepth = 0
             for parent in parentList:
-                if (parent.lang == language or parent.lang in self.oldVersions(language)) and recursionDepth < 3:
-                    logging.debug('Searching deeper for word %s with lang %s' % (parent.word, parent.lang))
-                    recursionDepth += 1
-                    logging.debug('Recursion depth: %s' % recursionDepth)
+                if (parent.lang == language or parent.lang in self.oldVersions(language)) and parent.recursionDepth < 3:
+                    logging.debug('Searching deeper for word %s with lang %s and recursionDepth %s' % (parent.word, parent.lang, parent.recursionDepth))
                     for otherParent in parent.parents: # Go deeper.
                         newParents.append(otherParent)
                 else:
