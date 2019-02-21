@@ -128,9 +128,10 @@ class Word():
             for parent in parentList:
                 if (parent.lang == language or parent.lang in self.oldVersions(language)) and recursionDepth < 3:
                     logging.debug('Searching deeper for word %s with lang %s' % (parent.word, parent.lang))
+                    recursionDepth += 1
+                    logging.debug('Recursion depth: %s' % recursionDepth)
                     for otherParent in parent.parents: # Go deeper.
                         newParents.append(otherParent)
-                    recursionDepth += 1
                 else:
                     newParents.append(parent)
             parentList = newParents
