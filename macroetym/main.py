@@ -67,7 +67,7 @@ class Word():
         self.word = word
         self.ignoreAffixes = ignoreAffixes
         self.ignoreCurrent = ignoreCurrent
-        self.recursionLevel = 0
+        self.recursionDepth = 0
 
     def __repr__(self):
         return '%s (%s)' % (self.word, self.lang)
