@@ -19,6 +19,10 @@ If you experience errors, you could try installing with `pip3` instead:
 
     pip3 install .
 
+And you'll probably need some NLTK data, if you don't have it already:
+
+    python3 -c "import nltk; nltk.download('punkt'); nltk.download('stopwords'); nltk.download('averaged_perceptron_tagger'); nltk.download('wordnet')"
+
 ## Usage
 
 To compare the macro-etymologies of _Moby Dick_ and _Pride and Prejudice_, first download the texts to your current working directory, then run: 
