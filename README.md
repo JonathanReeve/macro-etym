@@ -27,13 +27,32 @@ And you'll probably need some NLTK data, if you don't have it already:
 
 ## Usage
 
-To compare the macro-etymologies of _Moby Dick_ and _Pride and Prejudice_, first download the texts to your current working directory, then run: 
+To compute the macro-etymology of a text, just give the filename of a text in your current working directory: 
+ 
+    macroetym moby-dick.text
+
+                   moby-dick.txt
+    Austronesian   0.050381
+    Balto-Slavic   0.028789
+    Celtic         0.115158
+    Germanic      35.710858
+    Hellenic       0.964445
+    Indo-Iranian   0.127153
+    Japonic        0.019193
+    Latinate      62.415431
+    Other          0.237513
+    Semitic        0.230315
+    Turkic         0.071974
+    Uralic         0.028789
+
+To compare the macro-etymologies of two or more texts, supply them as arguments: 
 
     macroetym moby-dick.txt pride-and-prejudice.txt
 
-To see that data represented in a chart (experimental), try appending `--chart`. Although you might be better off outputting it as a CSV (with `--csv`) and then making your own chart using spreadsheet software. 
+To see that data represented in a chart (experimental), try appending `--chart`. 
+Although you might be better off outputting it as a CSV (with `--csv`) and then making your own chart using spreadsheet software. 
 
-To see a list of options, run:
+To see a full list of options, run:
 
     macroetym --help
 
