@@ -1,20 +1,19 @@
-import csv                                 # to parse the Etymological Wordnet CSV file
-from collections import Counter            # to count things
-from nltk import word_tokenize             # for breaking texts into words
-from nltk.tokenize import RegexpTokenizer # for span tokenizing
-from nltk.tag import pos_tag               # for detecting parts of speech
-from nltk.stem import WordNetLemmatizer    # for getting dictionary forms of words
-from string import punctuation             # for cleaning texts
-from pycountry import languages            # to look up ISO language codes
-from nltk.corpus import stopwords          # to remove unnecessary words
-from nltk.corpus import wordnet
-import pandas as pd                        # for pretty charts
-import matplotlib                          # also for pretty charts
-#matplotlib.style.use('ggplot')             # make the charts look nicer
-import click                               # make it a command-line program
-import codecs
-import logging                             # to log messages
+from collections import Counter
+from nltk import word_tokenize
+from nltk.corpus import stopwords
+from nltk.corpus import wordnet as wn
+from nltk.stem import WordNetLemmatizer
+from nltk.tag import pos_tag
+from nltk.tokenize import RegexpTokenizer
 from pkg_resources import resource_filename
+from pycountry import languages
+from string import punctuation
+import click
+import codecs
+import csv
+import logging
+import matplotlib
+import pandas as pd
 
 """
 
@@ -74,27 +73,24 @@ class Word():
     def __str__(self):
         return self.word
 
-    def oldVersions(self, language):
+    @staticmethod
+    def old_versions(language):
         """
         Returns a list of older versions of a language, such that given "eng"
         (Modern English) it will return "enm" (Middle English). This is used
         for filtering out current languages in the ignoreCurrent option of
         parents() below.
         """
-        if language == 'eng':
-            return ['enm']
-        if language == 'fra':
-            return ['frm', 'xno'] # Middle French
-        if language == 'dut':
-            return ['dum'] # Middle Dutch
-        if language == 'gle': # Irish
-            return ['mga'] # Middle Irish
+        lang_map = {'eng': ['enm'],
+                    'fra': ['frm', 'xno'],
+                    'dut': ['dum'],
+                    'gle': ['mga']}
         # TODO: add other languages here.
-        else:
-            return []
+        return lang_map.get(language, [])
 
     @property
     def parents(self):
+        """ A wrapper for getParents"""
         return self.getParents()
 
     def getParents(self, l=0):
@@ -125,7 +121,7 @@ class Word():
         if self.ignoreCurrent:
             newParents = []
             for parent in parentList:
-                if (parent.lang == language or parent.lang in self.oldVersions(language)) and l<3:
+                if (parent.lang == language or parent.lang in self.old_versions(language)) and l<3:
                     logging.debug('Searching deeper for word %s with lang %s' % (parent.word, parent.lang))
                     for otherParent in parent.getParents(l=l+1): # Go deeper.
                         newParents.append(otherParent)
@@ -135,11 +131,11 @@ class Word():
         return parentList
 
     @property
-    def parentLanguages(self):
-        parentLangs = []
+    def parent_languages(self):
+        parent_langs = []
         for parent in self.parents:
-            parentLangs.append(parent.lang)
-        return LangList(parentLangs)
+            parent_langs.append(parent.lang)
+        return LangList(parent_langs)
 
     @property
     def grandparents(self):
@@ -147,14 +143,15 @@ class Word():
         for parent in self.parents]
 
     @property
-    def grandparentLanguages(self):
-        grandparentLangs = []
-        for grandparentList in self.grandparents:
-            for grandparent in grandparentList:
-                grandparentLangs.append(grandparent.lang)
-        return LangList(grandparentLangs)
+    def grandparent_languages(self):
+        grandparent_langs = []
+        for grandparent_list in self.grandparents:
+            for grandparent in grandparent_list:
+                grandparent_langs.append(grandparent.lang)
+        return LangList(grandparent_langs)
 
-    def split(self, expression):
+    @staticmethod
+    def split(expression):
         """ Takes and expression in the form 'enm: not' and returns
         a Word object where word.lang is 'enm' and word.word is 'not'.
         """
@@ -162,22 +159,24 @@ class Word():
         return Word(parts[1].strip(), parts[0])
 
 class Text():
+    """ A container for texts, where we can store things
+    like its lemmas and tokens. """
     def __init__(self, text, lang='eng', ignoreAffixes=True, ignoreCurrent=True):
         self.text = text
         self.lang = lang
         self.ignoreAffixes = ignoreAffixes
         self.ignoreCurrent = ignoreCurrent
-        logging.debug('Initializing text with lang %s' % lang)
+        logging.debug('Initializing text with lang %s', lang)
         if ignoreAffixes:
             logging.debug('Ignoring affixes.')
         if ignoreCurrent:
             logging.debug('Ignoring current language and its middle variants.')
 
     langDict = {'Germanic': ['eng', 'enm', 'ang', 'deu', 'dut', 'nld', 'dum',
-                            'non', 'gml', 'yid', 'swe', 'rme', 'sco', 'isl',
-                            'dan'],
+                             'non', 'gml', 'yid', 'swe', 'rme', 'sco', 'isl',
+                             'dan'],
                 'Latinate': ['fra', 'frm', 'fro', 'lat', 'spa', 'xno', 'por',
-                            'ita'],
+                             'ita'],
                 'Indo-Iranian': ['hin', 'fas'],
                 'Celtic': ['gle', 'gla'],
                 'Hellenic': ['grc'],
@@ -200,65 +199,62 @@ class Text():
     #     return tokenizer.tokenize(self.text)
 
     @property
-    def cleanTokens(self, removeStopwords=True):
+    def clean_tokens(self, remove_stopwords=True):
         clean = [token for token in self.tokens if token not in punctuation]
         clean = [token.lower() for token in clean]
         clean = [token for token in clean if token.isalpha()]
-        if removeStopwords:
-            clean = self.removeStopwords(clean)
+        if remove_stopwords:
+            clean = self.remove_stopwords(clean)
         return clean
 
-    def removeStopwords(self, tokens):
-        availableStopwords = "danish english french hungarian norwegian"\
-        "spanish turkish dutch finnish german italian portuguese russian"\
-        "swedish".split()
-        stopDict = {lang[:3]: lang for lang in availableStopwords}
-        stopDict['fra'] = 'french' # Exception
-        stopDict['deu'] = 'german' # Another exception
-        if self.lang in stopDict:
-            stops = stopwords.words(stopDict[self.lang])
+    def remove_stopwords(self, tokens):
+        """ Remove stopwords from a list of tokens. """
+        available_stopwords = """danish english french hungarian norwegian
+        spanish turkish dutch finnish german italian portuguese russian
+        swedish""".split()
+        stop_dict = {lang[:3]: lang for lang in available_stopwords}
+        stop_dict['fra'] = 'french' # Exception
+        stop_dict['deu'] = 'german' # Another exception
+        if self.lang in stop_dict:
+            stops = stopwords.words(stop_dict[self.lang])
             return [token for token in tokens if token not in stops]
         else:
             return tokens
 
     @property
     def types(self):
-        return set(self.cleanTokens)
+        """ Get types (unique words) from a list of tokens. """
+        return set(self.clean_tokens)
 
     @property
     def posTags(self):
+        """ Get POS tags from a list of types. """
         return pos_tag(self.types)
 
     @property
     def lemmas(self):
+        """ Get lemmas from a text, if the text is english. """
         # Don't try to lemmatize non-English texts.
         if self.lang != 'eng':
             return self.types
-        wordnetLemmatizer = WordNetLemmatizer()
-        lemmas = []
-        for word, pos in self.posTags:
-            pos = self.get_wordnet_pos(pos)
-            if pos == '':
-                pos = 'n'
-            lemmas.append(wordnetLemmatizer.lemmatize(word, pos))
-        return lemmas
+        lemmatizer = WordNetLemmatizer()
 
-    def get_wordnet_pos(self, treebank_tag):
-        if treebank_tag.startswith('J'):
-            return wordnet.ADJ
-        elif treebank_tag.startswith('V'):
-            return wordnet.VERB
-        elif treebank_tag.startswith('N'):
-            return wordnet.NOUN
-        elif treebank_tag.startswith('R'):
-            return wordnet.ADV
-        else:
-            return ''
+        def get_wordnet_pos(treebank_tag):
+            """ Translate between treebank tag style and WordNet tag style."""
+            tag_map = {"J": wn.ADJ,
+                       "V": wn.VERB,
+                       "N": wn.NOUN,
+                       "R": wn.ADV}
+            return tag_map.get(treebank_tag, 'n')
+
+        return [lemmatizer.lemmatize(word, get_wordnet_pos(pos))
+                  for word, pos in self.posTags]
+
 
     @property
     def wordObjects(self):
         return [Word(token, self.lang, ignoreAffixes=self.ignoreAffixes,
-        ignoreCurrent=self.ignoreCurrent) for token in self.lemmas]
+                     ignoreCurrent=self.ignoreCurrent) for token in self.lemmas]
 
     def annotate(self):
         """ Returns an annotated text in HTML format. """
@@ -270,9 +266,9 @@ class Text():
             print(word, word.parents)
 
     def getStats(self, pretty=False):
-        statsList = [word.parentLanguages.stats for word in self.wordObjects]
+        stats_list = [word.parent_languages.stats for word in self.wordObjects]
         stats = {}
-        for item in statsList:
+        for item in stats_list:
             if len(item) > 0:
                 for lang, perc in item.items():
                     if lang not in stats:
@@ -292,8 +288,7 @@ class Text():
                     prettyLang = "Other Language"
                 prettyStats[prettyLang] = round(perc, 2) # rename the key
             return prettyStats
-        else:
-            return stats
+        return stats
 
     def getFamily(self, language):
         for family, children in self.langDict.items():
