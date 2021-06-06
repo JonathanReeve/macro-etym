@@ -387,7 +387,9 @@ def cli(filenames, allstats, lang, showfamilies, affixes,
         logging.basicConfig(level=logging.DEBUG)
 
     for filename in filenames:
-        with codecs.open(filename, "r",encoding='utf-8', errors='ignore') as fdata:
+        with codecs.open(filename,
+                         "r", encoding='utf-8',
+                         errors='ignore') as fdata:
             text = fdata.read()
 
         t = Text(text, lang, ignoreAffixes, ignoreCurrent)
