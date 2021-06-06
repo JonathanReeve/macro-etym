@@ -1,16 +1,19 @@
 [![Gitpod ready-to-code](https://img.shields.io/badge/Gitpod-ready--to--code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/JonathanReeve/macro-etym)
 
-# The Macro-Etymological Analyzer, v2.0.0
+# The Macro-Etymological Analyzer
 
-This is a rewrite of [The Macro-Etymological Analyzer](http://jonreeve.com/etym), a tool for etymological text analysis originally written as a web app on the LAMP stack.
+Have you ever wanted to know what proportion of your text is words of Latinate or Germanic origin? 
 
-## New Features in v2.0.0
+This is a command-line tool for macro-etymological text analysis. It looks up all the words in your text in an etymological dictionary (the [Etymological Wordnet](http://etym.org/)), and compiles statistics about them. 
+
+## New Features in v2.x
 
  * The web interface has been replaced with a command-line interface, making the MEA scriptable and machine-readable and writable. A web front-end to the command-line interface will be possible in a future version.
  * It is now possible to analyze and compare multiple texts at a time.
  * Users can filter for only those language families they care about.
 
 ## Installation
+
 You can install this program with git and pip: 
 
     git clone https://github.com/JonathanReeve/macro-etym

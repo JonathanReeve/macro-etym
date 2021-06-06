@@ -14,7 +14,7 @@ setup(
   version = '0.1.2',
   description = 'A tool for macro-etymological textual analysis.',
   author = 'Jonathan Reeve',
-  author_email = 'jon.reeve@gmail.com',
+  author_email = 'jonathan@jonreeve.com',
   url = 'https://github.com/JonathanReeve/macro-etym',
   download_url = 'https://github.com/JonathanReeve/macro-etym/tarball/0.1.2', 
   install_requires = ['Click', 'nltk', 'pycountry', 'pandas',
