@@ -17,19 +17,19 @@ First, get only those entries with the relation "rel:etymology": grep
 
 from collections import Counter
 from string import punctuation
+import codecs
 from nltk import word_tokenize
 from nltk.corpus import stopwords
 from nltk.corpus import wordnet as wn
 from nltk.stem import WordNetLemmatizer
 from nltk.tag import pos_tag
-from nltk.tokenize import RegexpTokenizer
+# from nltk.tokenize import RegexpTokenizer
 from pkg_resources import resource_filename
 from pycountry import languages
 import click
-import codecs
 import csv
 import logging
-import matplotlib
+# import matplotlib
 import pandas as pd
 
 # Parse the CSV file.
@@ -61,6 +61,7 @@ class LangList():
         for lang in counter.keys():
             stats[lang] = (counter[lang] / len(self.langs))*100
         return stats
+
 
 class Word():
     """
@@ -98,7 +99,7 @@ class Word():
         """ A wrapper for getParents"""
         return self.getParents()
 
-    def getParents(self, l=0):
+    def getParents(self, level=0):
         """
         The main etymological lookup method.
 
@@ -116,27 +117,29 @@ class Word():
 
         # Finds the first-generation ancestor(s) of a word.
         try:
-            rawParentList = etymdict[language + ": " + self.word]
+            raw_parent_list = etymdict[language + ": " + self.word]
         except:
-            rawParentList = []
-        parentList = [self.split(parent) for parent in rawParentList]
+            raw_parent_list = []
+        parent_list = [self.split(parent) for parent in raw_parent_list]
         if self.ignoreAffixes:
-            parentList = [p for p in parentList if p.word[0] is not '-']
-            parentList = [p for p in parentList if p.word[-1] is not '-']
+            parent_list = [p for p in parent_list if p.word[0] != '-']
+            parent_list = [p for p in parent_list if p.word[-1] != '-']
         if self.ignoreCurrent:
             newParents = []
-            for parent in parentList:
-                if (parent.lang == language or parent.lang in self.old_versions(language)) and l<3:
+            for parent in parent_list:
+                if (parent.lang == language or parent.lang in self.old_versions(language)) and level < 3:
                     logging.debug('Searching deeper for word %s with lang %s' % (parent.word, parent.lang))
-                    for otherParent in parent.getParents(l=l+1): # Go deeper.
+                    for otherParent in parent.getParents(level=level+1):
+                        # Go deeper.
                         newParents.append(otherParent)
                 else:
                     newParents.append(parent)
-            parentList = newParents
-        return parentList
+            parent_list = newParents
+        return parent_list
 
     @property
     def parent_languages(self):
+        """ Get the parent languages of a word."""
         parent_langs = []
         for parent in self.parents:
             parent_langs.append(parent.lang)
@@ -144,11 +147,13 @@ class Word():
 
     @property
     def grandparents(self):
+        """ Get the grandparent words/languages of a word."""
         return [Word(parent.word, lang=parent.lang).parents
         for parent in self.parents]
 
     @property
     def grandparent_languages(self):
+        """ Get the grandparent languages for a word. """
         grandparent_langs = []
         for grandparent_list in self.grandparents:
             for grandparent in grandparent_list:
