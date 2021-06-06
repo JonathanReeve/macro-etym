@@ -1,4 +1,22 @@
+"""
+The Macro-Etymological Analyzer.
+Author: Jonathan Reeve, jonathan@jonreeve.com
+License: GPLv3
+
+This program looks up all the words in your text, using the Etymological
+Wordnet.
+
+I made the file included here, etymwn-smaller.tsv, by running these unix
+commands on the Etymological Wordnet:
+
+First, get only those entries with the relation "rel:etymology": grep
+    "rel:etymology" etymwn.tsv > etymwn-small.tsv Now we can remove the relation
+    column, since it's all "rel:etymology": cat etymwn-small.tsv | cut -f1,3 >
+    etymwn-smaller.tsv
+"""
+
 from collections import Counter
+from string import punctuation
 from nltk import word_tokenize
 from nltk.corpus import stopwords
 from nltk.corpus import wordnet as wn
@@ -7,25 +25,12 @@ from nltk.tag import pos_tag
 from nltk.tokenize import RegexpTokenizer
 from pkg_resources import resource_filename
 from pycountry import languages
-from string import punctuation
 import click
 import codecs
 import csv
 import logging
 import matplotlib
 import pandas as pd
-
-"""
-
-I made the file below, etymwn-smaller.tsv, by running these unix commands
-on the Etymological Wordnet:
-
-First, get only those entries with the relation "rel:etymology":
-    grep "rel:etymology" etymwn.tsv > etymwn-small.tsv
-Now we can remove the relation column, since it's all "rel:etymology":
-    cat etymwn-small.tsv | cut -f1,3 > etymwn-smaller.tsv
-
-"""
 
 # Parse the CSV file.
 etymdict = {}
