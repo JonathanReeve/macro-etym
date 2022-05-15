@@ -1,6 +1,6 @@
 with import <nixpkgs> {};
 
-((python37.withPackages (ps: with ps; [
+((python3.withPackages (ps: with ps; [
   pandas
   matplotlib
   click
