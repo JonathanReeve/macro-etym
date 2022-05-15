@@ -11,7 +11,7 @@ if sys.version_info[0] < 3:
 setup(
   name = 'macroetym',
   packages = ['macroetym'], # this must be the same as the name above
-  version = '0.1.2',
+  version = '0.1.3',
   description = 'A tool for macro-etymological textual analysis.',
   author = 'Jonathan Reeve',
   author_email = 'jonathan@jonreeve.com',
