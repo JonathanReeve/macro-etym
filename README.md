@@ -6,7 +6,7 @@ Have you ever wanted to know what proportion of your text is words of Latinate o
 
 This is a command-line tool for macro-etymological text analysis. It looks up all the words in your text in an etymological dictionary (the [Etymological Wordnet](http://etym.org/)), and compiles statistics about them. 
 
-## New Features in v2.x
+## New Features in this version
 
  * The web interface has been replaced with a command-line interface, making the MEA scriptable and machine-readable and writable. A web front-end to the command-line interface will be possible in a future version.
  * It is now possible to analyze and compare multiple texts at a time.
