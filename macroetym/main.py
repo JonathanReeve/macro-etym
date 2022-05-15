@@ -387,10 +387,23 @@ def cli(filenames, allstats, lang, showfamilies, affixes,
         logging.basicConfig(level=logging.DEBUG)
 
     for filename in filenames:
-        with codecs.open(filename,
-                         "r", encoding='utf-8',
-                         errors='ignore') as fdata:
-            text = fdata.read()
+        try:
+            with open(filename) as fdata:
+                text = fdata.read()
+        except UnicodeDecodeError as e:
+            logging.error(f"Can't open file {filename} in the normal way, using utf-8.")
+            logging.error(f"I'll try opening using other encodings, but you may want to Try converting it to utf-8..")
+            logging.error(f"Here's the error: {e}")
+            try:
+                with open(filename, encoding='utf-16') as fdata:
+                    text = fdata.read()
+            except UnicodeDecodeError as e:
+                logging.error(f"Can't open file {filename} as UTF-16, either. Try converting it to utf-8. Error: {e}")
+                try:
+                    with open(filename, encoding='latin1') as fdata:
+                        text = fdata.read()
+                except UnicodeDecodeError as e:
+                    logging.error(f"Can't open file {filename} as latin1, either. Try converting it to utf-8. Error: {e}")
 
         t = Text(text, lang, ignoreAffixes, ignoreCurrent)
 
