@@ -35,7 +35,7 @@ import pandas as pd
 # Parse the CSV file.
 etymdict = {}
 etymwn = resource_filename(__name__, 'etymwn-smaller.tsv')
-with open(etymwn) as csvfile:
+with open(etymwn, encoding="utf-8") as csvfile:
     csvreader = csv.reader(csvfile, delimiter='\t')
     for line in csvreader:
         if line[0] in etymdict:
