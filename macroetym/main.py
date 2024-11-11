@@ -210,21 +210,32 @@ class Text():
 
     @property
     def clean_tokens(self, remove_stopwords=True):
-        clean = [token for token in self.tokens if token not in punctuation]
-        clean = [token.lower() for token in clean]
-        clean = [token for token in clean if token.isalpha()]
+        clean = [token.lower() for token in self.tokens
+                 if token not in punctuation and token.isalpha()]
         if remove_stopwords:
             clean = self.remove_stopwords(clean)
         return clean
 
     def remove_stopwords(self, tokens):
         """ Remove stopwords from a list of tokens. """
-        available_stopwords = """danish english french hungarian norwegian
-        spanish turkish dutch finnish german italian portuguese russian
-        swedish""".split()
-        stop_dict = {lang[:3]: lang for lang in available_stopwords}
-        stop_dict['fra'] = 'french' # Exception
-        stop_dict['deu'] = 'german' # Another exception
+        stop_dict = {
+            'dan': 'danish',
+            'eng': 'english',
+            'fra': 'french',
+            'hun': 'hungarian',
+            'nor': 'norwegian',
+            'spa': 'spanish',
+            'tur': 'turkish',
+            'dut': 'dutch',
+            'fin': 'finnish',
+            'deu': 'german',
+            'ita': 'italian',
+            'por': 'portuguese',
+            'rus': 'russian',
+            'swe': 'swedish',
+            'ger': 'german',
+            'fre': 'french',
+        }
         if self.lang in stop_dict:
             stops = stopwords.words(stop_dict[self.lang])
             return [token for token in tokens if token not in stops]
@@ -250,7 +261,30 @@ class Text():
         lemmatizer = WordNetLemmatizer()
 
         def get_wordnet_pos(treebank_tag):
-            """ Translate between treebank tag style and WordNet tag style."""
+            """
+            Translate between treebank tag style and WordNet tag style.
+
+            Here, we map the treebank tag to the wordnet tag by taking the
+            first letter of the treebank tag and mapping it to the wordnet tag.
+
+            Upenn Treebank part-of-speech tags are used by the nltk pos tagger.
+            The possible tags are ennumerated by nltk.help.upenn_tagset().
+
+            - Nouns, e.g., are tagged as 'NN', 'NNS', 'NNP', 'NNPS'.
+            - Verbs, e.g., are tagged as 'VB', 'VBD', 'VBG', 'VBN', 'VBP', 'VBZ'.
+            - Adjectives, e.g., are tagged as 'JJ', 'JJR', 'JJS'.
+            - Adverbs, e.g., are tagged as 'RB', 'RBR', 'RBS'.
+
+            Wordnet uses a different part-of-speech tagset.
+
+            - Nouns are 'n'
+            - verbs are 'v'
+            - adjectives are 'a'
+            - adverbs are 'r'.
+
+            If the treebank tag is not in the map, we default to 'n' (noun).
+            """
+            treebank_tag = treebank_tag[0]
             tag_map = {"J": wn.ADJ,
                        "V": wn.VERB,
                        "N": wn.NOUN,
