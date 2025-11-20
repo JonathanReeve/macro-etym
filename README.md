@@ -6,27 +6,28 @@ Have you ever wanted to know what proportion of your text is words of Latinate o
 
 This is a command-line tool for macro-etymological text analysis. It looks up all the words in your text in an etymological dictionary (the [Etymological Wordnet](http://etym.org/)), and compiles statistics about them. 
 
-## New Features in this version
+## Changelog
 
- * The web interface has been replaced with a command-line interface, making the MEA scriptable and machine-readable and writable. A web front-end to the command-line interface will be possible in a future version.
- * It is now possible to analyze and compare multiple texts at a time.
- * Users can filter for only those language families they care about.
+See [CHANGELOG.md](CHANGELOG.md) for a detailed history of changes.
 
 ## Installation
 
-You can install this program with git and pip: 
+This project uses the [Nix package manager](https://nixos.org/) with Flakes to provide a reproducible development environment.
 
+1.  **Clone the repository:**
+    ```bash
     git clone https://github.com/JonathanReeve/macro-etym
     cd macro-etym
-    pip install .
+    ```
 
-If you experience errors, you could try installing with `pip3` instead:
+2.  **Activate the development environment:**
+    If you have `nix` and `direnv` installed, the environment should activate automatically when you enter the directory.
 
-    pip3 install .
-
-And you'll probably need some NLTK data, if you don't have it already:
-
-    python3 -c "import nltk; nltk.download('punkt'); nltk.download('stopwords'); nltk.download('averaged_perceptron_tagger'); nltk.download('wordnet')"
+    Otherwise, you can activate it manually:
+    ```bash
+    nix develop
+    ```
+    This will download all necessary dependencies, including the correct version of Python and any required system libraries. The first time you enter the environment, it will also set up a local virtual environment using `uv` and download the necessary SpaCy models.
 
 ## Usage
 
