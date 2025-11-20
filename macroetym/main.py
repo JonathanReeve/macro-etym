@@ -18,19 +18,74 @@ First, get only those entries with the relation "rel:etymology": grep
 from collections import Counter
 from string import punctuation
 import codecs
-from nltk import word_tokenize
-from nltk.corpus import stopwords
-from nltk.corpus import wordnet as wn
-from nltk.stem import WordNetLemmatizer
-from nltk.tag import pos_tag
-# from nltk.tokenize import RegexpTokenizer
+import spacy
+from spacy.cli.download import download as spacy_download
+from spacy.tokens import Doc, Token
 from importlib.resources import files
 from pycountry import languages
 import click
 import csv
 import logging
-# import matplotlib
 import pandas as pd
+
+# --- SpaCy Model Management & Custom Components ---
+
+# Define custom attributes for etymological data
+if not Token.has_extension("parent_languages"):
+    Token.set_extension("parent_languages", default=None)
+
+@spacy.Language.component("etymology_lookup")
+def etymology_lookup_component(doc):
+    """
+    SpaCy component to look up etymologies for tokens and store them in a custom attribute.
+    """
+    lang_3 = doc.user_data.get("lang_3")
+    if not lang_3:
+        return doc
+    for token in doc:
+        if not token.is_stop and not token.is_punct and token.is_alpha:
+            word_obj = Word(token.lemma_.lower(), lang=lang_3)
+            token._.parent_languages = word_obj.parent_languages
+    return doc
+
+SPACY_MODEL_MAP = {
+    "eng": "en_core_web_md",
+    "deu": "de_core_news_md",
+    "fra": "fr_core_news_md",
+    "spa": "es_core_news_md",
+    "por": "pt_core_news_md",
+    "ita": "it_core_news_md",
+    "nld": "nl_core_news_md",
+    # Add other languages and models here
+}
+
+def load_spacy_model(lang: str):
+    """
+    Loads a SpaCy model, downloading it via pip if not found.
+    """
+    if lang not in SPACY_MODEL_MAP:
+        logging.error(f"No SpaCy model defined for language code: {lang}")
+        nlp = spacy.blank(lang)
+        if "etymology_lookup" not in nlp.pipe_names:
+            nlp.add_pipe("etymology_lookup", last=True)
+        return nlp
+
+    model_name = SPACY_MODEL_MAP[lang]
+    
+    try:
+        nlp = spacy.load(model_name)
+    except OSError:
+        logging.warning(f"SpaCy model '{model_name}' not found. Downloading...")
+        spacy_download(model_name)
+        nlp = spacy.load(model_name)
+
+    if "etymology_lookup" not in nlp.pipe_names:
+        nlp.add_pipe("etymology_lookup", last=True)
+        
+    return nlp
+
+# --- End SpaCy Model Management & Custom Components ---
+
 
 # Parse the CSV file.
 etymdict = {}
@@ -169,18 +224,26 @@ class Word():
         return Word(parts[1].strip(), parts[0])
 
 class Text():
-    """ A container for texts, where we can store things
-    like its lemmas and tokens. """
+    """ A container for texts, powered by SpaCy. """
     def __init__(self, text, lang='eng', ignoreAffixes=True, ignoreCurrent=True):
-        self.text = text
         self.lang = lang
         self.ignoreAffixes = ignoreAffixes
         self.ignoreCurrent = ignoreCurrent
+        
         logging.debug('Initializing text with lang %s', lang)
         if ignoreAffixes:
             logging.debug('Ignoring affixes.')
         if ignoreCurrent:
             logging.debug('Ignoring current language and its middle variants.')
+            
+        nlp = load_spacy_model(lang)
+        
+        # Manually create the Doc, set user_data, and process the pipeline
+        doc = nlp.make_doc(text)
+        doc.user_data["lang_3"] = self.lang
+        for name, proc in nlp.pipeline:
+            doc = proc(doc)
+        self.doc = doc
 
     langDict = {'Germanic': ['eng', 'enm', 'ang', 'deu', 'dut', 'nld', 'dum',
                              'non', 'gml', 'yid', 'swe', 'rme', 'sco', 'isl',
@@ -197,86 +260,19 @@ class Text():
                 'Uralic': ['fin', 'hun'],
                 'Japonic': ['jpn']}
 
-    @property
-    def tokens(self):
-        return word_tokenize(self.text)
-
-    # @property
-    # def tokens(self):
-    #     tokenizer = RegexpTokenizer("\b\w+['-]?\b")
-    #     tokenizer = RegexpTokenizer(r"\b\w+['-]?\w+?\b")
-    #     self.spans = tokenizer.word_tokenize(self.text)
-    #     return tokenizer.tokenize(self.text)
-
-    @property
-    def clean_tokens(self, remove_stopwords=True):
-        clean = [token for token in self.tokens if token not in punctuation]
-        clean = [token.lower() for token in clean]
-        clean = [token for token in clean if token.isalpha()]
-        if remove_stopwords:
-            clean = self.remove_stopwords(clean)
-        return clean
-
-    def remove_stopwords(self, tokens):
-        """ Remove stopwords from a list of tokens. """
-        available_stopwords = """danish english french hungarian norwegian
-        spanish turkish dutch finnish german italian portuguese russian
-        swedish""".split()
-        stop_dict = {lang[:3]: lang for lang in available_stopwords}
-        stop_dict['fra'] = 'french' # Exception
-        stop_dict['deu'] = 'german' # Another exception
-        if self.lang in stop_dict:
-            stops = stopwords.words(stop_dict[self.lang])
-            return [token for token in tokens if token not in stops]
-        else:
-            return tokens
-
-    @property
-    def types(self):
-        """ Get types (unique words) from a list of tokens. """
-        return set(self.clean_tokens)
-
-    @property
-    def posTags(self):
-        """ Get POS tags from a list of types. """
-        return pos_tag(self.types)
-
-    @property
-    def lemmas(self):
-        """ Get lemmas from a text, if the text is english. """
-        # Don't try to lemmatize non-English texts.
-        if self.lang != 'eng':
-            return self.types
-        lemmatizer = WordNetLemmatizer()
-
-        def get_wordnet_pos(treebank_tag):
-            """ Translate between treebank tag style and WordNet tag style."""
-            tag_map = {"J": wn.ADJ,
-                       "V": wn.VERB,
-                       "N": wn.NOUN,
-                       "R": wn.ADV}
-            return tag_map.get(treebank_tag, 'n')
-
-        return [lemmatizer.lemmatize(word, get_wordnet_pos(pos))
-                  for word, pos in self.posTags]
-
-
-    @property
-    def wordObjects(self):
-        return [Word(token, self.lang, ignoreAffixes=self.ignoreAffixes,
-                     ignoreCurrent=self.ignoreCurrent) for token in self.lemmas]
-
     def annotate(self):
         """ Returns an annotated text in HTML format. """
         html = ""
         return html
 
     def showMacroEtym(self):
-        for word in self.wordObjects:
-            print(word, word.parents)
+        for token in self.doc:
+            if token._.parent_languages:
+                print(token.text, token._.parent_languages)
 
     def getStats(self, pretty=False):
-        stats_list = [word.parent_languages.stats for word in self.wordObjects]
+        stats_list = [token._.parent_languages.stats for token in self.doc if token._.parent_languages]
+        
         stats = {}
         for item in stats_list:
             if len(item) > 0:
@@ -285,6 +281,10 @@ class Text():
                         stats[lang] = perc
                     else:
                         stats[lang] += perc
+        
+        if not stats:
+            return {}
+
         allPercs = sum(stats.values())
         for lang, perc in stats.items():
             stats[lang] = ( perc / allPercs ) * 100

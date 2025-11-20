@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "macroetym"
-version = "0.1.4"
+version = "0.2.0"
 authors = [
   { name="Jonathan Reeve", email="jonathan@jonreeve.com" },
 ]
@@ -18,10 +18,11 @@ classifiers = [
 ]
 dependencies = [
     "Click",
-    "nltk",
     "pycountry",
     "pandas>=2.0.0",
     "matplotlib",
+    "spacy",
+    "pip",
 ]
 keywords = ["nlp", "text-analysis", "etymology"]
 
