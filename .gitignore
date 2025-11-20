@@ -5,3 +5,5 @@ etymwn/
 macroetym.egg-info/
 texts/
 macroetym/__pycache__
+.direnv/
+/.venv_timestamp

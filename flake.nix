@@ -30,6 +30,7 @@
           packages = [
             python
             pkgs.uv
+            pkgs.bump2version
           ];
 
           # 1. Tell uv not to download managed Python versions
