@@ -23,6 +23,9 @@ dependencies = [
     "matplotlib",
     "spacy",
     "pip",
+    "pytest",
+    "sudachipy",
+    "sudachidict_core",
 ]
 keywords = ["nlp", "text-analysis", "etymology"]
 

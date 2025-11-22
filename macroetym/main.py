@@ -56,6 +56,7 @@ SPACY_MODEL_MAP = {
     "por": "pt_core_news_md",
     "ita": "it_core_news_md",
     "nld": "nl_core_news_md",
+    "jpn": "ja_core_news_md",
     # Add other languages and models here
 }
 
