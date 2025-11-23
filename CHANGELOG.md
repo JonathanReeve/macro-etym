@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.0] - 2025-11-22
+
+### Added
+- **Web Interface**: A new `web` command (`macroetym web`) launches a Streamlit-based web interface.
+- **Interactive Analysis**: The web UI allows users to upload text files or choose from pre-loaded texts for analysis.
+- **Visualizations**: The interface displays a Plotly pie chart of language family distribution and an annotated version of the text showing the etymological history of each word.
+
 ## [0.2.0] - 2025-11-20
 
 ### Changed

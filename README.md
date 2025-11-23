@@ -4,36 +4,32 @@
 
 Have you ever wanted to know what proportion of your text is words of Latinate or Germanic origin? 
 
-This is a command-line tool for macro-etymological text analysis. It looks up all the words in your text in an etymological dictionary (the [Etymological Wordnet](http://etym.org/)), and compiles statistics about them. 
+This is a tool for macro-etymological text analysis. It looks up all the words in your text in an etymological dictionary (the [Etymological Wordnet](http://etym.org/)), and compiles statistics about them. 
+
+This tool provides both a command-line interface and a web interface.
 
 ## Changelog
 
 See [CHANGELOG.md](CHANGELOG.md) for a detailed history of changes.
 
-## Installation
+## Installation and Usage
 
-This project uses the [Nix package manager](https://nixos.org/) with Flakes to provide a reproducible development environment.
+### For Users
 
-1.  **Clone the repository:**
-    ```bash
-    git clone https://github.com/JonathanReeve/macro-etym
-    cd macro-etym
-    ```
+The easiest way to install `macroetym` is with `pip` or `uv`.
 
-2.  **Activate the development environment:**
-    If you have `nix` and `direnv` installed, the environment should activate automatically when you enter the directory.
+```bash
+# With pip
+pip install .
+# With uv
+uv pip install .
+```
 
-    Otherwise, you can activate it manually:
-    ```bash
-    nix develop
-    ```
-    This will download all necessary dependencies, including the correct version of Python and any required system libraries. The first time you enter the environment, it will also set up a local virtual environment using `uv` and download the necessary SpaCy models.
-
-## Usage
+#### Command-Line Interface
 
 To compute the macro-etymology of a text, just give the filename of a text in your current working directory: 
  
-    macroetym moby-dick.text
+    macroetym analyze moby-dick.text
 
                    moby-dick.txt
     Austronesian   0.050381
@@ -51,14 +47,14 @@ To compute the macro-etymology of a text, just give the filename of a text in yo
 
 To compare the macro-etymologies of two or more texts, supply them as arguments: 
 
-    macroetym moby-dick.txt pride-and-prejudice.txt
+    macroetym analyze moby-dick.txt pride-and-prejudice.txt
 
 To see that data represented in a chart (experimental), try appending `--chart`. 
 Although you might be better off outputting it as a CSV (with `--csv`) and then making your own chart using spreadsheet software. 
 
 To see a full list of options, run:
 
-    macroetym --help
+    macroetym analyze --help
 
 That should show you this screen: 
 
@@ -84,3 +80,30 @@ Options:
   --verbose            Show debugging messages.
   --help               Show this message and exit.
 ```
+
+#### Web Interface
+
+This package also comes with a web interface. To use it, run: 
+
+    macroetym web
+
+This will open a web page in your browser. You can use the interface to upload a text file or choose from pre-loaded texts and see the etymological analysis and an annotated version of the text.
+
+### For Developers (Hacking)
+
+This project uses the [Nix package manager](https://nixos.org/) with Flakes to provide a reproducible development environment.
+
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/JonathanReeve/macro-etym
+    cd macro-etym
+    ```
+
+2.  **Activate the development environment:**
+    If you have `nix` and `direnv` installed, the environment should activate automatically when you enter the directory.
+
+    Otherwise, you can activate it manually:
+    ```bash
+    nix develop
+    ```
+    This will download all necessary dependencies, including the correct version of Python and any required system libraries. The first time you enter the environment, it will also set up a local virtual environment using `uv` and download the necessary SpaCy models. You will then be in a shell with `macroetym` available as a command.

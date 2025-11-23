@@ -27,6 +27,7 @@ import click
 import csv
 import logging
 import pandas as pd
+import subprocess
 
 # --- SpaCy Model Management & Custom Components ---
 
@@ -354,7 +355,11 @@ class Text():
         df = pd.DataFrame(d)
         print(df.to_csv())
 
-@click.command()
+@click.group()
+def cli():
+    pass
+
+@cli.command()
 @click.argument('filenames', nargs=-1, required=True)
 @click.option('--allstats', is_flag=True,
         help="Get all etymological statistics about the file(s).")
@@ -372,7 +377,7 @@ class Text():
 @click.option('--chart', is_flag=True, help="Make a pretty graph of the "\
               "results. For one text, a pie; for multiple, a bar.")
 @click.option('--verbose', is_flag=True, help="Show debugging messages.")
-def cli(filenames, allstats, lang, showfamilies, affixes,
+def analyze(filenames, allstats, lang, showfamilies, affixes,
         current, csv, chart, verbose):
     """
     Analyzes a text(s) for the etymologies of its words, and tallies the words
@@ -454,6 +459,22 @@ def cli(filenames, allstats, lang, showfamilies, affixes,
         fig.tight_layout()
         fig.savefig('chart.png')
         print('Chart saved as chart.png.')
+
+import subprocess
+
+@cli.command()
+def web():
+    """
+    Launch the web interface.
+    """
+    print("Launching web interface...")
+    with open('web_out.log', 'wb') as out_log, open('web_err.log', 'wb') as err_log:
+        try:
+            subprocess.run(["streamlit", "run", "macroetym/web_ui.py"], stdout=out_log, stderr=err_log)
+        except FileNotFoundError:
+            print("Error: `streamlit` command not found.")
+            print("Please make sure Streamlit is installed and in your PATH.")
+
 
 if __name__ == '__main__':
     cli()

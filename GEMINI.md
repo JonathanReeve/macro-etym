@@ -8,18 +8,28 @@ The core functionality involves reading a text, tokenizing it into words, lemmat
 
 The following is the plan for the next major version of the Macro-Etymological Analyzer, which will focus on using a more modern data source and handling linguistic ambiguity.
 
-### 1. New Data Source: Kaikki.org
+### 1. Web interface. (`macroetym web`)
+
+The web interface should be built with [Streamlit](https://streamlit.io/), and use [spacy-streamlit](https://github.com/explosion/spacy-streamlit) along with [displaCy](https://spacy.io/usage/visualizers), SpaCy's visualizer. 
+
+It should have these components: 
+
+1. A file input box. It should allow for drag-and-drop, and it can warn users of the maximum file size it can handle (I have no idea what this limitation would be). While uploading, it should display some useful progress bar. It should also give the user the option of choosing between a number of pre-computed texts, like Moby Dick, A Portrait of the Artist as a Young Man, and so on. 
+
+2. Once the user has uploaded a file or files, it should then display: (a) high-level statistics about the language families represented in the text, maybe in a pie chart. (b) the etymological stats of the different segments of the text (let's say 10 segments to begin with) and (c) an annotated edition of the same text, using DisplaCy to show the annotations. So for each word, it should be annotated with little language codes like ENM < FRA < LAT for a language history like Middle English, French, and Latin. 
+
+### 2. New Data Source: Kaikki.org
 
 The current `etymwn-smaller.tsv` will be replaced with the comprehensive etymological data from [Kaikki.org](https://kaikki.org/). This provides richer, more detailed, and more accurate information, but requires a new data processing pipeline.
 
-### 2. Database Generation (`macroetym init`)
+### 3. Database Generation (`macroetym init`)
 
 A new command, `macroetym init`, will be created to process the large Kaikki data file (`raw-wiktextract-data.jsonl.gz`).
 - **SQLite Database:** This command will parse the JSONL file and load the data into a local SQLite database (`~/.local/share/macroetym/kaikki.sqlite`). This avoids loading the entire multi-gigabyte file into memory.
 - **Schema for Ambiguity:** The database will use a two-table schema (`words` and `senses`) to correctly model words that have multiple senses with different etymologies and definitions (glosses).
 - **Indexing:** A database index will be created on the `word` and `lang` columns to ensure near-instant lookups.
 
-### 3. Word Sense Disambiguation (WSD)
+### 4. Word Sense Disambiguation (WSD)
 
 To handle ambiguous etymologies, the core analysis logic will be upgraded to perform Word Sense Disambiguation.
 - **Batch SQL Queries:** To analyze a text, the tool will first fetch all possible senses for all unique words in the text with a single, efficient SQL query.
