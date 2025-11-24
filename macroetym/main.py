@@ -28,6 +28,12 @@ import csv
 import logging
 import pandas as pd
 import subprocess
+import sqlite3
+import json
+import os
+import gzip
+from pathlib import Path
+from rich.progress import Progress
 
 # --- SpaCy Model Management & Custom Components ---
 
@@ -461,6 +467,83 @@ def analyze(filenames, allstats, lang, showfamilies, affixes,
         print('Chart saved as chart.png.')
 
 import subprocess
+
+
+@cli.command()
+@click.option('--input-file', default='raw-wiktextract-data.jsonl', help='Input Kaikki data file.')
+def init(input_file):
+    """
+    Initialize the etymological database from Kaikki data.
+    """
+    db_path = Path.home() / ".local" / "share" / "macroetym" / "kaikki.sqlite"
+    db_path.parent.mkdir(parents=True, exist_ok=True)
+    
+    conn = sqlite3.connect(db_path)
+    c = conn.cursor()
+    
+    print(f"Database created at {db_path}")
+
+    # Create tables
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS words (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            word TEXT NOT NULL,
+            lang TEXT NOT NULL,
+            pos TEXT,
+            etymology TEXT
+        )
+    ''')
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS senses (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            word_id INTEGER,
+            gloss TEXT NOT NULL,
+            FOREIGN KEY(word_id) REFERENCES words(id)
+        )
+    ''')
+    print("Tables 'words' and 'senses' created.")
+
+    # Process data and insert into database
+    opener = gzip.open if input_file.endswith('.gz') else open
+
+    # Get file size for progress bar
+    file_size = os.path.getsize(input_file)
+
+    with opener(input_file, 'rt', encoding='utf-8') as f:
+        with Progress() as progress:
+            task = progress.add_task("[cyan]Processing data...", total=file_size)
+            for line in f:
+                try:
+                    data = json.loads(line)
+                    word = data.get('word')
+                    lang = data.get('lang')
+                    pos = data.get('pos')
+                    etymology = data.get('etymology_text')
+
+                    if word and lang:
+                        c.execute("INSERT INTO words (word, lang, pos, etymology) VALUES (?, ?, ?, ?)",
+                                  (word, lang, pos, etymology))
+                        word_id = c.lastrowid
+
+                        if 'senses' in data:
+                            for sense in data['senses']:
+                                if 'glosses' in sense:
+                                    for gloss in sense['glosses']:
+                                        c.execute("INSERT INTO senses (word_id, gloss) VALUES (?, ?)",
+                                                  (word_id, ",".join(gloss)))
+                except json.JSONDecodeError:
+                    logging.warning(f"Skipping malformed line: {line.strip()}")
+                
+                progress.update(task, advance=len(line.encode('utf-8')))
+
+    print("Data insertion complete. Creating index...")
+    # Create index
+    c.execute("CREATE INDEX IF NOT EXISTS idx_word_lang ON words (word, lang)")
+    
+    conn.commit()
+    conn.close()
+    
+    print("Database initialization complete.")
 
 @cli.command()
 def web():

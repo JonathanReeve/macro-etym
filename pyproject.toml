@@ -29,6 +29,7 @@ dependencies = [
     "pytest",
     "sudachipy",
     "sudachidict_core",
+    "rich",
 ]
 keywords = ["nlp", "text-analysis", "etymology"]
 

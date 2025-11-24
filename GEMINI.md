@@ -17,6 +17,7 @@ It should have these components:
 1. A file input box. It should allow for drag-and-drop, and it can warn users of the maximum file size it can handle (I have no idea what this limitation would be). While uploading, it should display some useful progress bar. It should also give the user the option of choosing between a number of pre-computed texts, like Moby Dick, A Portrait of the Artist as a Young Man, and so on. 
 
 2. Once the user has uploaded a file or files, it should then display: (a) high-level statistics about the language families represented in the text, maybe in a pie chart. (b) the etymological stats of the different segments of the text (let's say 10 segments to begin with) and (c) an annotated edition of the same text, using DisplaCy to show the annotations. So for each word, it should be annotated with little language codes like ENM < FRA < LAT for a language history like Middle English, French, and Latin. 
+3. The colors used in the pie chart and the colors of the annotated words should all coordinate, such that if Latinate is represented as red in the pie chart, it should also be red in the annotations via DisplaCy.
 
 ### 2. New Data Source: Kaikki.org
 
