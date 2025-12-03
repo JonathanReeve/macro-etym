@@ -26,9 +26,14 @@ The current `etymwn-smaller.tsv` will be replaced with the comprehensive etymolo
 ### 3. Database Generation (`macroetym init`)
 
 A new command, `macroetym init`, will be created to process the large Kaikki data file (`raw-wiktextract-data.jsonl.gz`).
-- **SQLite Database:** This command will parse the JSONL file and load the data into a local SQLite database (`~/.local/share/macroetym/kaikki.sqlite`). This avoids loading the entire multi-gigabyte file into memory.
+
+- **SQLite Database:** This command will parse the JSONL file and load the data into a local SQLite database (`~/.local/share/macroetym/etymology.sqlite`). This avoids loading the entire multi-gigabyte file into memory.
 - **Schema for Ambiguity:** The database will use a two-table schema (`words` and `senses`) to correctly model words that have multiple senses with different etymologies and definitions (glosses).
 - **Indexing:** A database index will be created on the `word` and `lang` columns to ensure near-instant lookups.
+
+1. First, check to see whether the database already exists at the location above. If it exists, no need to do anything. 
+2. If it does exist, first confirm with the user (Y/N) whether to download the dictionary file, as it is quite large (2G+ transfer, and 20G temporary file, resulting in a 2G database). The user should have about 30G free space with which to do this.  
+
 
 ### 4. Word Sense Disambiguation (WSD)
 

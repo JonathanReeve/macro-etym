@@ -25,6 +25,7 @@ dependencies = [
     "streamlit",
     "spacy-streamlit",
     "plotly",
+    "requests",
     "pip",
     "pytest",
     "sudachipy",
