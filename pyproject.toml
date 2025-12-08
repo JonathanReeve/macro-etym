@@ -31,6 +31,9 @@ dependencies = [
     "sudachipy",
     "sudachidict_core",
     "rich",
+    "pycldf",
+    "gitpython",
+    "newick",
 ]
 keywords = ["nlp", "text-analysis", "etymology"]
 

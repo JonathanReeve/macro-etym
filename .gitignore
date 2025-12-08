@@ -7,3 +7,12 @@ texts/
 macroetym/__pycache__
 .direnv/
 /.venv_timestamp
+
+clean_gutenberg.py
+extract.json
+extract2.json
+extract5.json
+raw-wiktextract-data.jsonl
+requirements.txt
+web_err.log
+web_out.log

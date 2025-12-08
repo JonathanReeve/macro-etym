@@ -1,8 +1,12 @@
 # Project Overview
 
-This project, "The Macro-Etymological Analyzer," is a Python command-line tool for conducting macro-etymological analysis of text. It determines the proportion of words in a given text that originate from different language families, such as Latinate or Germanic. The tool leverages the `nltk` library for natural language processing tasks and `pandas` for data manipulation and presentation. The command-line interface is built using `click`.
+This project, "The Macro-Etymological Analyzer," is a Python command-line tool for conducting macro-etymological analysis of text. It determines the proportion of words in a given text that originate from different language families, such as Latinate or Germanic. The tool leverages the SpaCy library for natural language processing tasks and Pandas for data manipulation and presentation. The command-line interface is built using Click. 
 
-The core functionality involves reading a text, tokenizing it into words, lemmatizing them, and then looking up their etymologies in a provided data file (`etymwn-smaller.tsv`). The results are then aggregated to provide statistics on the etymological origins of the words in the text.
+The core functionality involves reading a text, tokenizing it into words, lemmatizing them, and then looking up their etymologies. The results are then aggregated to provide statistics on the etymological origins of the words in the text.
+
+# Development 
+
+This project uses Nix Flakes to manage the development environment, and `uv` in the background. To install new dependencies, edit pyproject.toml and run `direnv reload`, which should reload the flake.nix and run `uv sync`. 
 
 # Roadmap
 
@@ -17,11 +21,22 @@ It should have these components:
 1. A file input box. It should allow for drag-and-drop, and it can warn users of the maximum file size it can handle (I have no idea what this limitation would be). While uploading, it should display some useful progress bar. It should also give the user the option of choosing between a number of pre-computed texts, like Moby Dick, A Portrait of the Artist as a Young Man, and so on. 
 
 2. Once the user has uploaded a file or files, it should then display: (a) high-level statistics about the language families represented in the text, maybe in a pie chart. (b) the etymological stats of the different segments of the text (let's say 10 segments to begin with) and (c) an annotated edition of the same text, using DisplaCy to show the annotations. So for each word, it should be annotated with little language codes like ENM < FRA < LAT for a language history like Middle English, French, and Latin. 
-3. The colors used in the pie chart and the colors of the annotated words should all coordinate, such that if Latinate is represented as red in the pie chart, it should also be red in the annotations via DisplaCy.
+
+NB: The colors used in the pie chart and the colors of the annotated words should all coordinate, such that if Latinate is represented as red in the pie chart, it should also be red in the annotations via DisplaCy. 
 
 ### 2. New Data Source: Kaikki.org
 
-The current `etymwn-smaller.tsv` will be replaced with the comprehensive etymological data from [Kaikki.org](https://kaikki.org/). This provides richer, more detailed, and more accurate information, but requires a new data processing pipeline.
+Instead of Etymological Wordnet data, `etymwn-smaller.tsv`, included in the repository, this is replaced with the comprehensive etymological data from [Kaikki.org](https://kaikki.org/). This provides richer, more detailed, and more accurate information, but requires a new data processing pipeline.
+
+Etymological data is now downloaded from <https://kaikki.org/dictionary/raw-wiktextract-data.jsonl.gz> but this is a 20G file when uncompressed. That file is then processed to produce ~/.local/share/macroetym/kaikki.sqlite. 
+
+Users shouldn't have to generate the database themselves from source every time, since the source data is 20G. The database should be provided somehow. So what we need here is the ability to have GitHub Actions generate the database, and then for `macroetym init` to download from GitHub releases.  
+
+### 2.5. New Data Source: Glottolog-CLDF 
+
+`macroetym init` should also download Glottolog language data, preferably from Glottolog-CLDF. This can be done by finding the latest GitHub release of the data and downloading it from, e.g., <https://github.com/glottolog/glottolog-cldf/archive/refs/tags/v5.2.1.tar.gz>
+
+We'll need to then parse this language data into some tables in our sqlite file which can allow us to look up language names, language families, and (in the future) geographic locations associated with these language families. 
 
 ### 3. Database Generation (`macroetym init`)
 
@@ -33,7 +48,6 @@ A new command, `macroetym init`, will be created to process the large Kaikki dat
 
 1. First, check to see whether the database already exists at the location above. If it exists, no need to do anything. 
 2. If it does exist, first confirm with the user (Y/N) whether to download the dictionary file, as it is quite large (2G+ transfer, and 20G temporary file, resulting in a 2G database). The user should have about 30G free space with which to do this.  
-
 
 ### 4. Word Sense Disambiguation (WSD)
 

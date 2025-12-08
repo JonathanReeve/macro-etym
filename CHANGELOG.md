@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.0] - 2025-12-04
+
+### Changed
+- **New Data Source**: The etymological data source has been switched from the limited `etymwn-smaller.tsv` to the comprehensive Kaikki.org dataset. Language classification now uses data from Glottolog, replacing the `pycountry` library.
+- **Database Backend**: A new `init` command (`macroetym init`) has been added to download and process the Kaikki and Glottolog data into a local SQLite database (`~/.local/share/macroetym/etymology.sqlite`).
+- **Hierarchical Family Analysis**: The `analyze` command now provides more granular language family classifications (e.g., "Germanic," "Italic") by using the full Glottolog family tree.
+- **Performance Optimizations**: The `analyze` command has been significantly sped up through the use of an in-memory database cache and batch querying for etymological lookups.
+- **Improved Logging**: The `--verbose` flag has been replaced with a more flexible `--debug` option, allowing for finer control over logging levels (e.g., `info`, `debug`).
+
 ## [0.3.0] - 2025-11-22
 
 ### Added
